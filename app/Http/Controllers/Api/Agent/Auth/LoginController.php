@@ -120,7 +120,7 @@ class LoginController extends Controller
         }
         
         if($data['type'] == 'phone'){
-            if($validated['email'] != '' || $validated['email'] != null){  
+            if($data['email'] != '' || $data['email'] != null){  
                 $email = Agent::where('email',$data['email'])->first();
                 if($email){
                     $error = ['error'=>[__('Email address already exist')]];
