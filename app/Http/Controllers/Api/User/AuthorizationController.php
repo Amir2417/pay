@@ -504,6 +504,40 @@ class AuthorizationController extends Controller
                 $error = ['error'=>[__('Username already exist')]];
                 return Helpers::validation($error);
             }
+
+            //Check Email
+            $check_user_email = User::where('email',$data['email'])->first();
+            if($check_user_email){
+                $error = ['error'=>[__('Email already exist')]];
+                return Helpers::validation($error);
+            }
+            $check_email_agent = Agent::where('email',$data['email'])->first();
+            if($check_email_agent){
+                $error = ['error'=>[__('Email already exist')]];
+                return Helpers::validation($error);
+            }
+            $check_email_merchant = Merchant::where('email',$data['email'])->first();
+            if($check_email_merchant){
+                $error = ['error'=>[__('Email already exist')]];
+                return Helpers::validation($error);
+            }
+
+            //check sms
+            $check_user_sms = User::where('full_mobile',$data['phone'])->first();
+            if($check_user_sms){
+                $error = ['error'=>[__('Phone already exist')]];
+                return Helpers::validation($error);
+            }
+            $check_sms_agent = Agent::where('full_mobile',$data['phone'])->first();
+            if($check_sms_agent){
+                $error = ['error'=>[__('Phone already exist')]];
+                return Helpers::validation($error);
+            }
+            $check_sms_merchant = Merchant::where('full_mobile',$data['phone'])->first();
+            if($check_sms_merchant){
+                $error = ['error'=>[__('Phone already exist')]];
+                return Helpers::validation($error);
+            }
                 
             $user                   = new User();
             $user->firstname        = isset($data['firstname']) ? $data['firstname'] : null;

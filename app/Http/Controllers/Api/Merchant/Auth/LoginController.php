@@ -20,8 +20,11 @@ use App\Traits\Merchant\RegisteredUsers;
 use App\Traits\ControlDynamicInputFields;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Notification;
 use App\Providers\Admin\BasicSettingsProvider;
 use App\Http\Helpers\Api\Helpers as ApiHelpers;
+use App\Models\Merchants\MerchantAuthorization;
+use App\Notifications\User\Auth\SendVerifyCode;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
@@ -87,21 +90,15 @@ class LoginController extends Controller
             $agree ='';
         }
 
-        if($basic_settings->merchant_email_verification == true){
-            $email_field = "required|string|email|max:150|unique:merchants,email";
-        }else{
-            $email_field = "nullable";
-        }
-
         $validator = Validator::make($request->all(), [
             'firstname'             => 'required|string|max:60',
             'lastname'              => 'required|string|max:60',
             'business_name'         => 'required|string|max:60',
-            'email'                 => $email_field,
+            'email'                 => 'nullable',
             'password'              => $passowrd_rule,
             'country'               => 'required|string|max:150',
             'city'                  => 'required|string|max:150',
-            'phone'                 => 'required|string|max:20',
+            'phone'                 => 'nullable|string|max:20',
             'zip_code'              => 'required|string|max:8',
             'agree'                 =>  $agree,
             'username'              => 'required'
@@ -123,33 +120,118 @@ class LoginController extends Controller
             $get_values = $this->registerPlaceValueWithFields($user_kyc_fields, $validated);
         }
         $data                       = $request->all();
-        $mobile                     = remove_speacial_char($data['phone']);
-        $complete_phone             = $mobile;
-        if($validated['email'] != '' || $validated['email'] != null){
-            $email = Merchant::where('email',$data['email'])->first();
-            if($email){
-                $error = ['error'=>[__('Email address already exist')]];
+        if($data['email'] == '' && $data['phone'] == ''){
+            $error = ['error'=>[__('Email or Phone number is required')]];
+            return ApiHelpers::validation($error);
+        }
+
+
+        if($data['type'] == 'phone'){
+            if($data['email'] != '' || $data['email'] != null){
+                $email = Merchant::where('email',$data['email'])->first();
+                if($email){
+                    $error = ['error'=>[__('Email address already exist.')]];
+                    return ApiHelpers::validation($error);
+                }else{
+                    
+                    $code = generate_random_code();
+                    $data = [
+                        'merchant_id'       =>  0,
+                        'email'         => $data['email'],
+                        'code'          => $code,
+                        'token'         => generate_unique_string("merchant_authorizations","token",200),
+                        'created_at'    => now(),
+                    ];
+                    DB::beginTransaction();
+                    try{
+                        $oldToken = MerchantAuthorization::where("email",$data['email'])->get();
+                        if($oldToken){
+                            foreach($oldToken as $token){
+                                $token->delete();
+                            }
+                        }
+                        DB::table("merchant_authorizations")->insert($data);
+                        if($basic_settings->merchant_email_notification == true && $basic_settings->merchant_email_verification == true){
+                            Notification::route("mail",$data['email'])->notify(new SendVerifyCode($data['email'], $code));
+                        }
+                        DB::commit();
+                    }catch(Exception $e) {
+                        DB::rollBack();
+                        $message = ['error'=>[__("Something went wrong! Please try again.")]];
+                        return ApiHelpers::error($message);
+                    };
+                    $message = ['success'=>[__('Verification code sended to your email address.')]];
+                    return ApiHelpers::success($request->all(),$message);
+                }
+            }else{
+                $email_verified  = true;
+                $sms_verified    = true;
+            }
+            $mobile              = remove_speacial_char($data['phone']);
+            $complete_phone      = $mobile;
+
+            $user_merchant = Merchant::where('full_mobile',$complete_phone)->first();
+            if($user_merchant){
+                $error = ['error'=>[__('Mobile number already exist in merchant.')]];
                 return ApiHelpers::validation($error);
             }
+            $user_agent = Agent::where('full_mobile',$complete_phone)->first();
+            if($user_agent){
+                $error = ['error'=>[__('Mobile number already exist in agent.')]];
+                return ApiHelpers::validation($error);
+            }
+            $user = User::where('full_mobile',$complete_phone)->first();
+            if($user){
+                $error = ['error'=>[__('Mobile number already exist in user. ')]];
+                return ApiHelpers::validation($error);
+            }
+        }else{
+            if($data['phone'] != '' || $data['phone'] != null){
+                $phone = Merchant::where('full_mobile',$data['phone'])->first();
+                if($phone){
+                    $error = ['error'=>[__('Phone Number already exist')]];
+                    return ApiHelpers::validation($error);
+                }else{
+                    
+                    $code = generate_random_code();
+                    $data = [
+                        'merchant_id'       =>  0,
+                        'phone'         => $data['phone'],
+                        'code'          => $code,
+                        'token'         => generate_unique_string("merchant_authorizations","token",200),
+                        'created_at'    => now(),
+                    ];
+                    DB::beginTransaction();
+                    try{
+                        $oldToken = MerchantAuthorization::where("phone",$data['phone'])->get();
+                        if($oldToken){
+                            foreach($oldToken as $token){
+                                $token->delete();
+                            }
+                        }
+                        DB::table("merchant_authorizations")->insert($data);
+                        if($basic_settings->merchant_sms_notification == true && $basic_settings->merchant_sms_verification == true){
+                            $message = __("Your code is :code",['code' => $code]);
+                            sendApiSMS($message,$data['phone']);  
+                        }
+                        DB::commit();
+                    }catch(Exception $e) {
+                        DB::rollBack();
+                        $message = ['error'=>[__("Something went wrong! Please try again.")]];
+                        return ApiHelpers::error($message);
+                    };
+                    $message = ['success'=>[__('Verification code sended to your phone number.')]];
+                    return ApiHelpers::success($request->all(),$message);
+                }
+    
+            } else{
+                $email_verified  = true;
+                $sms_verified    = true;
+            }
+            $mobile                     = '';
+            $complete_phone             = '';
         }
         
-
-        $user_merchant = Merchant::where('full_mobile',$complete_phone)->first();
-        if($user_merchant){
-            $error = ['error'=>[__('Mobile number already exist in merchant.')]];
-            return ApiHelpers::validation($error);
-        }
-        $user_agent = Agent::where('full_mobile',$complete_phone)->first();
-        if($user_agent){
-            $error = ['error'=>[__('Mobile number already exist in agent.')]];
-            return ApiHelpers::validation($error);
-        }
-        $user = User::where('full_mobile',$complete_phone)->first();
-        if($user){
-            $error = ['error'=>[__('Mobile number already exist in user. ')]];
-            return ApiHelpers::validation($error);
-        }
-
         $userName = $data['username'];
         $check_user_name = User::where('username',$userName)->first();
         if($check_user_name){
@@ -167,24 +249,18 @@ class LoginController extends Controller
             return ApiHelpers::validation($error);
         }
 
-        if($basic_settings->merchant_email_verification == false && ($data['email'] == '' || $data['email'] == null) ){
-            $email_verified     = true;
-        }elseif($basic_settings->merchant_email_verification == false && ($data['email'] != '' || $data['email'] != null)){
-            $email_verified     = false;
-        }else{
-            $email_verified     = true;
-        }
+        
 
         //Merchant Create
-        $user = new Merchant();
-        $user->firstname = isset($data['firstname']) ? $data['firstname'] : null;
-        $user->lastname = isset($data['lastname']) ? $data['lastname'] : null;
-        $user->business_name = isset($data['business_name']) ? $data['business_name'] : null;
-        $user->email = strtolower(trim($data['email']));
-        $user->mobile =  $mobile;
-        $user->full_mobile =    $complete_phone;
-        $user->password = Hash::make($data['password']);
-        $user->username = $userName;
+        $user                       = new Merchant();
+        $user->firstname            = isset($data['firstname']) ? $data['firstname'] : null;
+        $user->lastname             = isset($data['lastname']) ? $data['lastname'] : null;
+        $user->business_name        = isset($data['business_name']) ? $data['business_name'] : null;
+        $user->email                = strtolower(trim($data['email']));
+        $user->mobile               = $mobile;
+        $user->full_mobile          = $complete_phone;
+        $user->password             = Hash::make($data['password']);
+        $user->username             = $userName;
         $user->address = [
             'address' => isset($data['address']) ? $data['address'] : '',
             'city' => isset($data['city']) ? $data['city'] : '',
@@ -192,10 +268,10 @@ class LoginController extends Controller
             'country' =>isset($data['country']) ? $data['country'] : '',
             'state' => isset($data['state']) ? $data['state'] : '',
         ];
-        $user->status = 1;
-        $user->email_verified   = $email_verified;
-        $user->sms_verified =  true;
-        $user->kyc_verified =  ($basic_settings->merchant_kyc_verification == true) ? false : true;
+        $user->status               = 1;
+        $user->email_verified       = $email_verified;
+        $user->sms_verified         = $sms_verified;
+        $user->kyc_verified         = ($basic_settings->merchant_kyc_verification == true) ? false : true;
         $user->save();
         if( $user && $basic_settings->merchant_kyc_verification == true){
             $create = [

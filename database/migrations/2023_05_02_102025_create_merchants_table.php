@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('mobile_code')->nullable();
             $table->string('mobile')->nullable()->index();
-            $table->string('full_mobile')->nullable()->unique()->index();
+            $table->string('full_mobile')->nullable();
             $table->string('password');
             $table->unsignedBigInteger('refferal_user_id')->nullable();
             $table->string('image')->nullable();
