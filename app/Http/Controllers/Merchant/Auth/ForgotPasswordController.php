@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Session;
 
 class ForgotPasswordController extends Controller
 {
+    protected $basic_settings;
+    public function __construct()
+    {
+        $this->basic_settings = BasicSettingsProvider::get();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -44,30 +49,57 @@ class ForgotPasswordController extends Controller
             'credentials'   => "required|string|max:100",
         ]);
         
-        $user = Merchant::where('full_mobile',$request->credentials)->first();
+        $user = Merchant::orWhere('full_mobile',$request->credentials)
+                ->orWhere('email',$request->credentials)->first();
         if(!$user) {
             throw ValidationException::withMessages([
                 'credentials'       => __("Merchant doesn't exists."),
             ]);
         }
-
-        $token = generate_unique_string("merchant_password_resets","token",80);
-        $code = generate_random_code();
-
-        try{
-            MerchantPasswordReset::where("merchant_id",$user->id)->delete();
-            $password_reset = MerchantPasswordReset::create([
-                'merchant_id'   => $user->id,
-                'phone'         => $request->credentials,  
-                'token'         => $token,
-                'code'          => $code,
-            ]);
-            $message = __("Your forgot password code is :code",['code' => $code]);
-           sendApiSMS($message,$request->credentials);
-        }catch(Exception $e) {
-            return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
+        if($request->credentials == $user->full_mobile) {
+            $type           = GlobalConst::PHONE;
+        }else{
+            $type           = GlobalConst::EMAIL;
         }
-        return redirect()->route('merchant.password.forgot.code.verify.form',$token)->with(['success' => [__('Verification code sended to your email address.')]]);
+        if($type == GlobalConst::PHONE) {
+            $token = generate_unique_string("merchant_password_resets","token",80);
+            $code = generate_random_code();
+    
+            try{
+                MerchantPasswordReset::where("merchant_id",$user->id)->delete();
+                $password_reset = MerchantPasswordReset::create([
+                    'merchant_id'   => $user->id,
+                    'phone'         => $request->credentials,  
+                    'token'         => $token,
+                    'code'          => $code,
+                ]);
+                $message = __("Your forgot password code is :code",['code' => $code]);
+               sendApiSMS($message,$request->credentials);
+            }catch(Exception $e) {
+                return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
+            }
+            return redirect()->route('merchant.password.forgot.code.verify.form',$token)->with(['success' => [__('Verification code sended to your phone number.')]]);
+        }else{
+            $token = generate_unique_string("merchant_password_resets","token",80);
+            $code = generate_random_code();
+    
+            try{
+                MerchantPasswordReset::where("merchant_id",$user->id)->delete();
+                $password_reset = MerchantPasswordReset::create([
+                    'merchant_id'   => $user->id,
+                    'email'         => $request->credentials,  
+                    'token'         => $token,
+                    'code'          => $code,
+                ]);
+                if($this->basic_settings->merchant_email_notification == true && $this->basic_settings->merchant_email_verification == true){
+                    $user->notify(new PasswordResetEmail($user,$password_reset));
+                }
+            }catch(Exception $e) {
+                return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
+            }
+            return redirect()->route('merchant.password.forgot.code.verify.form',$token)->with(['success' => [__('Verification code sended to your email address.')]]);
+        }
+        
     }
     /**
      * Method for show verify code form
@@ -80,7 +112,7 @@ class ForgotPasswordController extends Controller
         if(Carbon::now() <= $password_reset->created_at->addMinutes(GlobalConst::USER_PASS_RESEND_TIME_MINUTE)) {
             $resend_time = Carbon::now()->diffInSeconds($password_reset->created_at->addMinutes(GlobalConst::USER_PASS_RESEND_TIME_MINUTE));
         }
-        $user_phone = $password_reset->phone ?? "";
+        $user_phone = $password_reset->phone ?? $password_reset->email;
         return view('merchant.auth.forgot-password.verify',compact('page_title','token','user_phone','resend_time'));
     }
     /**

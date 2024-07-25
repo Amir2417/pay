@@ -42,7 +42,8 @@ class LoginController extends Controller
             $error =  ['error'=>$validator->errors()->all()];
             return ApiHelpers::validation($error);
         }
-        $user = Merchant::where('full_mobile',$request->phone)->first();
+        $user = Merchant::orWhere('full_mobile',$request->phone)
+                ->orWhere('email',$request->phone)->first();
         if(!$user){
             $error = ['error'=>[__('Merchant does not exist')]];
             return ApiHelpers::validation($error);

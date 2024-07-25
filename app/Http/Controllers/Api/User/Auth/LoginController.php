@@ -49,7 +49,7 @@ class LoginController extends Controller
             return ApiHelpers::validation($error);
         }
 
-        $user = User::where('full_mobile',$request->phone)->first();
+        $user = User::orWhere('full_mobile',$request->phone)->orWhere('email',$request->phone)->first();
         if(!$user){
             $error = ['error'=>[__("User doesn't exists.")]];
             return ApiHelpers::validation($error);
