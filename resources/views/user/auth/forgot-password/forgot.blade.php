@@ -29,10 +29,7 @@
 
                     <div class="col-xl-12 col-lg-12 form-group">
                         <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text copytext"><span>{{ __("Phone") }}</span></span>
-                            </div>
-                            <input type="text" name="credentials" class="form--control checkUser mobile" placeholder="{{ __('enter Phone Number') }}">
+                            <input type="text" name="credentials" class="form--control checkUser mobile" placeholder="{{ __('Enter Phone Number or Email Address') }}">
 
                         </div>
                         <small class="text-danger exits"></small>

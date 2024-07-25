@@ -20,7 +20,7 @@
                 </a>
             </div>
             <h5 class="title text-center">{{ __("Please enter the code") }}</h5>
-            <p class="d-block text-center">{{ __("We sent a 6 digit code to your phone") }}</p>
+            <p class="d-block text-center">{{ __("We sent a 6 digit code to ") }} {{ @$user_phone }}</p>
             <form class="account-form" action="{{ setRoute('user.password.forgot.verify.code',$token) }}" method="POST">
                 @csrf
                 <div id="recaptcha-container"></div>
