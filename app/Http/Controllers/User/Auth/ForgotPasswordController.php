@@ -64,7 +64,7 @@ class ForgotPasswordController extends Controller
                 'code'          => $code,
             ]);
             $message = __("Your forgot password code is :code",['code' => $code]);
-           sendApiSMS($message,$request->credentials);
+            sendApiSMS($message,$request->credentials);
         }catch(Exception $e) {
             return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
         }

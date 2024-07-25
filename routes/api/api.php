@@ -85,7 +85,9 @@ Route::prefix('user')->group(function(){
         Route::post('send/email/otp', [AuthorizationController::class,'sendEmailOtp']);
         Route::post('send/sms/otp', [AuthorizationController::class,'sendSMSOtp']);
         Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
+        Route::post('verify/email',[AuthorizationController::class,"verifyEmail"]);
         Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
+        Route::post('verify/sms',[AuthorizationController::class,"verifySms"]);
         Route::post('resend/email/otp',[AuthorizationController::class,"resendEmailOtp"]);
         Route::post('resend/sms/otp',[AuthorizationController::class,"resendSMSOtp"]);
         Route::post('check-username',[AuthorizationController::class,"checkUsername"]);
