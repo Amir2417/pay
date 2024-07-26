@@ -781,7 +781,7 @@ class RegisterController extends Controller
                 $exist = User::where('full_mobile',$validated['phone'])->first();
     
                 if($exist) return back()->with(['error' => [__('User already  exists, please try with another Phone.')]]);
-                if($basic_settings->sms_verification == true){
+                if($basic_settings->merchant_sms_verification == true){
                 
                     $code = generate_random_code();
                     $data = [
