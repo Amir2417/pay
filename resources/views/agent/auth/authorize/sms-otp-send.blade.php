@@ -1,4 +1,4 @@
-@extends('user.layouts.user_auth')
+@extends('agent.layouts.user_auth')
 
 @push('css')
 
