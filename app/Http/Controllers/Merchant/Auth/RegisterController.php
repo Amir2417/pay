@@ -684,6 +684,37 @@ class RegisterController extends Controller
                         return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
                     };
                     return redirect()->route('merchant.email.verify',$data['token'])->with(['success' => [__('Verification code sended to your email address.')]]);
+                }else{
+                    $data = event(new Registered($user = $this->create($validated)));
+                
+                    if( $data && $basic_settings->merchant_kyc_verification == true){
+                        $create = [
+                            'merchant_id'       => $user->id,
+                            'data'          => json_encode($get_values),
+                            'created_at'    => now(),
+                        ];
+                
+                        DB::beginTransaction();
+                        try{
+                            DB::table('merchant_kyc_data')->updateOrInsert(["merchant_id" => $user->id],$create);
+                            $user->update([
+                                'kyc_verified'  => GlobalConst::PENDING,
+                            ]);
+                            DB::commit();
+                        }catch(Exception $e) {
+                            DB::rollBack();
+                            $user->update([
+                                'kyc_verified'  => GlobalConst::DEFAULT,
+                            ]);
+                
+                            return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+                        }
+            
+                    }
+                    $request->session()->forget('register_info');
+                    $this->guard()->login($user);
+            
+                    return $this->registered($request, $user);
                 }
             }else{
                 $data = event(new Registered($user = $this->create($validated)));

@@ -652,7 +652,7 @@ class RegisterController extends Controller
                 if($exist) return back()->with(['error' => [__('Agent already  exists, please try with another email.')]]);
             }
             if($validated['email'] != '' || $validated['email'] != null){
-                if($basic_settings->email_verification == true){
+                if($basic_settings->agent_email_verification == true){
                 
                     $code = generate_random_code();
                     $data = [
@@ -679,6 +679,37 @@ class RegisterController extends Controller
                         return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
                     };
                     return redirect()->route('agent.email.verify',$data['token'])->with(['success' => [__('Verification code sended to your email address.')]]);
+                }else{
+                    $data = event(new Registered($user = $this->create($validated)));
+                
+                    if( $data && $basic_settings->agent_kyc_verification == true){
+                        $create = [
+                            'agent_id'       => $user->id,
+                            'data'          => json_encode($get_values),
+                            'created_at'    => now(),
+                        ];
+                
+                        DB::beginTransaction();
+                        try{
+                            DB::table('agent_kyc_data')->updateOrInsert(["agent_id" => $user->id],$create);
+                            $user->update([
+                                'kyc_verified'  => GlobalConst::PENDING,
+                            ]);
+                            DB::commit();
+                        }catch(Exception $e) {
+                            DB::rollBack();
+                            $user->update([
+                                'kyc_verified'  => GlobalConst::DEFAULT,
+                            ]);
+                
+                            return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+                        }
+            
+                    }
+                    $request->session()->forget('register_info');
+                    $this->guard()->login($user);
+            
+                    return $this->registered($request, $user);
                 }
             }else{
                 $data = event(new Registered($user = $this->create($validated)));
@@ -776,7 +807,7 @@ class RegisterController extends Controller
                 $exist = User::where('full_mobile',$validated['phone'])->first();
     
                 if($exist) return back()->with(['error' => [__('User already  exists, please try with another Phone.')]]);
-                if($basic_settings->sms_verification == true){
+                if($basic_settings->agent_sms_verification == true){
                 
                     $code = generate_random_code();
                     $data = [
@@ -805,6 +836,37 @@ class RegisterController extends Controller
                         return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
                     };
                     return redirect()->route('agent.sms.otp.send',$data['token'])->with(['success' => [__('Verification code sended to your phone number.')]]);
+                }else{
+                    $data = event(new Registered($user = $this->create($validated)));
+                
+                if( $data && $basic_settings->agent_kyc_verification == true){
+                    $create = [
+                        'agent_id'       => $user->id,
+                        'data'          => json_encode($get_values),
+                        'created_at'    => now(),
+                    ];
+            
+                    DB::beginTransaction();
+                    try{
+                        DB::table('agent_kyc_data')->updateOrInsert(["agent_id" => $user->id],$create);
+                        $user->update([
+                            'kyc_verified'  => GlobalConst::PENDING,
+                        ]);
+                        DB::commit();
+                    }catch(Exception $e) {
+                        DB::rollBack();
+                        $user->update([
+                            'kyc_verified'  => GlobalConst::DEFAULT,
+                        ]);
+            
+                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+                    }
+         
+                }
+                $request->session()->forget('register_info');
+                $this->guard()->login($user);
+         
+                return $this->registered($request, $user);
                 }
             }else{
                 $data = event(new Registered($user = $this->create($validated)));
