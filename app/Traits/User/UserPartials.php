@@ -11,7 +11,7 @@ trait UserPartials{
         $in['sender_type'] = 'User';
         $data 				= [
 			'receiver_type' => 'User',
-			'sender_type' => 'User',
+			'sender_type' 	=> 'User',
 			'phone'			=> $user->full_mobile,
 			'amount'		=> null,
 		];

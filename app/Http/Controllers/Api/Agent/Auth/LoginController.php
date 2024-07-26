@@ -92,7 +92,7 @@ class LoginController extends Controller
             'password'      => $passowrd_rule,
             'country'       => 'required|string|max:150',
             'city'          => 'required|string|max:150',
-            'phone'         => 'nullable|string|max:20',
+            'phone'         => 'required|string|max:20',
             'zip_code'      => 'required|string|max:8',
             'agree'         =>  $agree,
             'type'          => 'required|string|max:150',

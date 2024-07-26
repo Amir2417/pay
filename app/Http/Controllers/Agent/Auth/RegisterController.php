@@ -874,7 +874,7 @@ class RegisterController extends Controller
             'password'      =>  $passowrd_rule,
             'country'       => 'required|string|max:150',
             'city'          => 'required|string|max:150',
-            'phone'         => 'nullable',
+            'phone'         => 'required',
             'zip_code'      => 'required|string|max:8',
             'agree'         =>  $agree,
         ]);

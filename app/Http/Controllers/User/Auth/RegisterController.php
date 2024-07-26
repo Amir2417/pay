@@ -872,7 +872,7 @@ class RegisterController extends Controller
             'country'       => 'required|string|max:150',
             'username'      => 'required',
             'city'          => 'required|string|max:150',
-            'phone'         => 'nullable',
+            'phone'         => 'required',
             'zip_code'      => 'required|string|max:8',
             'agree'         =>  $agree,
         ]);
