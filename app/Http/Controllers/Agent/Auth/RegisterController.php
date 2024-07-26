@@ -106,7 +106,7 @@ class RegisterController extends Controller
                         'sms_verified'  => false,
                         'email_verified'          => false,
                     ]);
-                    return redirect()->route("user.register.kyc");
+                    return redirect()->route("agent.register.kyc");
                 }
                 DB::table("agent_authorizations")->insert($data);
                 Session::put('register_data',[
@@ -145,7 +145,7 @@ class RegisterController extends Controller
                         'email_verified'  => false,
                         'sms_verified'          => false
                     ]);
-                    return redirect()->route("user.register.kyc");
+                    return redirect()->route("agent.register.kyc");
                 }
                 DB::table("agent_authorizations")->insert($data);
                 Session::put('register_data',[
