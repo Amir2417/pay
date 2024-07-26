@@ -137,7 +137,7 @@ class RegisterController extends Controller
             ];
            
             try{
-                if($basic_settings->email_verification == false){
+                if($basic_settings->merchant_email_verification == false){
                     Session::put('register_data',[
                         'credentials'   => $validated['credentials'],
                         'register_type' => $validated['register_type'],
