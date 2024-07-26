@@ -172,7 +172,7 @@
                                     </div>
                                 </form>
                                 <div class="payment-preview-thumb">
-                                    <img src="{{  get_fav($basic_settings) }}" alt="logo">
+                                    <img src="{{  get_fav_merchant($basic_settings) }}" alt="logo">
                                 </div>
                             </div>
                             <div class="payment-preview-box-right">
@@ -231,7 +231,7 @@
                                 </div>
                             </form>
                             <div class="payment-preview-thumb">
-                                <img src="{{  get_fav($basic_settings) }}" alt="logo">
+                                <img src="{{  get_fav_merchant($basic_settings) }}" alt="logo">
                             </div>
                         </div>
                         <div class="payment-preview-box-right">
