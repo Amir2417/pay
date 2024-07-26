@@ -71,7 +71,7 @@ class RegisterController extends Controller
      */
     public function sendVerifyCode(Request $request){
         $basic_settings = $this->basic_settings;
-        if($basic_settings->agree_policy){
+        if($basic_settings->merchant_agree_policy){
             $agree = 'required';
         }else{
             $agree = '';

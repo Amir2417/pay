@@ -72,7 +72,7 @@
                     </div>
                     <div class="col-xl-8 col-lg-8 form-group">
                         <div class="input-group">
-                            <input type="text" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',@$credentials) }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
+                            <input type="number" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',@$credentials) }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
                         </div>
                     </div>
                     @if($basic_settings->kyc_verification)
@@ -96,7 +96,6 @@
                                 <input type="checkbox" id="level-1" name="agree">
                                 <label for="level-1" class="mb-0">{{ __("I have agreed with") }} <a href="{{  $policies != null? setRoute('useful.link',$policies->slug):"javascript:void(0)" }}">{{__("Terms Of Use & Privacy Policy")}}</a></label>
                             </div>
-
                         </div>
                     </div>
                     @endif

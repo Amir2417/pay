@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('merchant.layouts.user_auth')
 
 @push('css')
 

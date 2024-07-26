@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-xl-4 col-lg-4 form-group">
                         <div class="input-group">
-                            <input type="text" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',@$credentials) }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
+                            <input type="number" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',@$credentials) }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
                         </div>
                     </div>
                     @if($basic_settings->merchant_kyc_verification)
