@@ -20,7 +20,7 @@ class VerificationGuard
         $merchant = auth()->user();
         $basic_settings = BasicSettings::first();
         if ($basic_settings->merchant_email_verification == true) {
-            if($merchant->merchant_email_verified == false) return mailVerificationTemplateMerchant($merchant);
+            if($merchant->email_verified == false) return mailVerificationTemplateMerchant($merchant);
         }
         return $next($request);
     }

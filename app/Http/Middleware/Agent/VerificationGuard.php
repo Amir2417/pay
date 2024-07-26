@@ -20,7 +20,7 @@ class VerificationGuard
         $agent = auth()->user();
         $basic_settings     = BasicSettings::first();
         if($basic_settings->agent_email_verification == true){
-            if($agent->agent_email_verified == false) return mailVerificationTemplateAgent($agent);
+            if($agent->email_verified == false) return mailVerificationTemplateAgent($agent);
         }
         
         return $next($request);

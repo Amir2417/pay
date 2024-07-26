@@ -20,7 +20,7 @@ class SMSVerificationGuard
         $user           = auth()->user();
         $basic_settings = BasicSettings::first();
         if ($basic_settings->agent_sms_verification == true) {
-            if ($user->agent_sms_verified == false) return agentSmsVerificationTemplate($user);
+            if ($user->sms_verified == false) return agentSmsVerificationTemplate($user);
         }
         return $next($request);
     }

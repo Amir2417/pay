@@ -20,7 +20,7 @@ class SMSVerificationGuard
         $user           = auth()->user();
         $basic_settings = BasicSettings::first();
         if ($basic_settings->merchant_sms_verification == true) {
-            if ($user->merchant_sms_verified == false) return merchantSmsVerificationTemplate($user);
+            if ($user->sms_verified == false) return merchantSmsVerificationTemplate($user);
         }
 
         return $next($request);
