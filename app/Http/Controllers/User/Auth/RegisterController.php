@@ -99,6 +99,7 @@ class RegisterController extends Controller
                         'credentials'   => $validated['credentials'],
                         'register_type' => $validated['register_type'],
                         'sms_verified'  => false,
+                        'email_verified'  => false,
                     ]);
                     return redirect()->route("user.register.kyc");
                 }
@@ -184,7 +185,7 @@ class RegisterController extends Controller
         Session::put('register_data',[
             'credentials'           => $auth_column->phone,
             'register_type'         => $register_type,
-            'sms_verified'          => true
+            'sms_verified'          => true,
         ]);
         try{
             $auth_column->delete();
@@ -644,7 +645,7 @@ class RegisterController extends Controller
                                                 'address' => '',
                                             ];
     
-    
+                                            
             if($validated['email'] != '' || $validated['email'] != null){
                 $exist = User::where('email',$validated['email'])->first();
     

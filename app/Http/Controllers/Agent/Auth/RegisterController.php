@@ -104,6 +104,7 @@ class RegisterController extends Controller
                         'credentials'   => $validated['credentials'],
                         'register_type' => $validated['register_type'],
                         'sms_verified'  => false,
+                        'email_verified'          => false,
                     ]);
                     return redirect()->route("user.register.kyc");
                 }
