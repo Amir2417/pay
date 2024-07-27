@@ -38,7 +38,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xxl-6 col-xl-12 col-lg-6 form-group paste-wrapper">
-                                    <label>{{ __("Email") }} ({{ __("Agent") }})<span class="text--base">*</span></label>
+                                    <label>{{ __("Phone") }} ({{ __("Agent") }})<span class="text--base">*</span></label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text copytext"><span>{{ __("Phone") }}</span></span>

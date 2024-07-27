@@ -43,10 +43,11 @@
                         <small class="text-danger exits"></small>
                     </div>
                     @if($basic_settings->agree_policy)
+                    
                     <div class="col-lg-12 form-group">
                         <div class="custom-check-group">
                             <input type="checkbox" id="agree" name="agree" required>
-                            <label for="agree">{{ __("I have agreed with") }} <a href=" {{  $policies != null? setRoute('useful.link',$policies->slug):"javascript:void(0)" }}">{{__("Terms Of Use & Privacy Policy")}}</a></label>
+                            <label for="agree">{{ __("I have agreed with") }} <a href="{{  $policies != null? setRoute('useful.link',$policies->slug):"javascript:void(0)" }}">{{__("Terms Of Use & Privacy Policy")}}</a></label>
                         </div>
                     </div>
                     @endif
