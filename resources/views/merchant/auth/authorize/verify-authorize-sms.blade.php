@@ -11,8 +11,8 @@
             <div class="account-wrapper">
                 <div class="account-logo text-center">
                     <a class="site-logo" href="{{ setRoute('index') }}">
-                        <img src="{{ get_logo_agent($basic_settings) }}"  data-white_img="{{ get_logo_agent($basic_settings,'white') }}"
-                        data-dark_img="{{ get_logo_agent($basic_settings,'dark') }}"
+                        <img src="{{ get_logo_merchant($basic_settings) }}"  data-white_img="{{ get_logo_merchant($basic_settings,'white') }}"
+                        data-dark_img="{{ get_logo_merchant($basic_settings,'dark') }}"
                             alt="site-logo">
                     </a>
                 </div>
