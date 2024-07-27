@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\User;
 
+use App\Models\Admin\BasicSettings;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,11 @@ class VerificationGuardApi
     public function handle(Request $request, Closure $next)
     {
         $user = auth()->user();
-        if($user->email_verified == false) return mailVerificationTemplateApi($user);
+        $basic_settings         = BasicSettings::first();
+        if($basic_settings->email_verification == true){
+
+            if($user->email_verified == false) return mailVerificationTemplateApi($user);
+        }
         return $next($request);
     }
 }

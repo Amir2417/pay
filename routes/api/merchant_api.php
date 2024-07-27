@@ -62,11 +62,11 @@ Route::prefix('merchant')->group(function(){
         Route::post('check/email/exist',[AuthorizationController::class,'checkEmailExist']);
         Route::post('send/otp', [AuthorizationController::class,'sendEmailOtp']);
         Route::post('verify/otp',[AuthorizationController::class,"verifyOtp"]);
-        Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
+        
         Route::post('resend/otp',[AuthorizationController::class,"resendEmailOtp"]);
         Route::post('send/sms/otp', [AuthorizationController::class,'sendSMSOtp']);
         Route::post('verify/sms',[AuthorizationController::class,"verifySms"]);
-        Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
+        
         Route::post('resend/sms/otp',[AuthorizationController::class,"resendSMSOtp"]);
         Route::post('check-username',[AuthorizationController::class,"checkUsername"]);
     });
@@ -88,6 +88,8 @@ Route::prefix('merchant')->group(function(){
         Route::post('send-sms-code', [AuthorizationController::class,'sendSMSCode']);
         Route::post('sms-verify', [AuthorizationController::class,'smsVerify']);
 
+        Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
+        Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
         Route::middleware(['CheckStatusApiMerchant','merchant.google.two.factor.api'])->group(function () {
             Route::get('dashboard', [UserController::class,'home']);
             Route::get('profile', [UserController::class,'profile']);
