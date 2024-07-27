@@ -25,39 +25,36 @@
                             @elseif ($item->type == payment_gateway_const()::TYPEADDSUBTRACTBALANCE)
                             <h4 class="title">{{ __("Balance Update From Admin") }}{{ __(" (".$item->creator_wallet->currency->code.")") }} </h4>
                             @elseif ($item->type == payment_gateway_const()::TYPETRANSFERMONEY)
-                                @if ($item->isAuthUserAgent())
                                     @if ($item->attribute == payment_gateway_const()::SEND)
                                         <h4 class="title">{{ __("Send Money to") }} {{ __(" @" . @$item->details->receiver_username) }} </h4>
                                     @elseif ($item->attribute == payment_gateway_const()::RECEIVED)
                                         <h4 class="title">{{ __("Received Money from") }} {{ __(" @" .@$item->details->sender_username) }} </h4>
                                     @endif
-                                @endif
                             @elseif ($item->type == payment_gateway_const()::TYPEMAKEPAYMENT)
-                                @if ($item->isAuthUserAgent())
+                               
                                     @if ($item->attribute == payment_gateway_const()::SEND)
                                         <h4 class="title">{{ __("Make Payment to") }} {{ __("@" . @$item->details->receiver->username." (".@$item->details->receiver->email.")") }} </h4>
                                     @elseif ($item->attribute == payment_gateway_const()::RECEIVED)
                                         <h4 class="title">{{ __("Make Payment From") }} {{ __("@" .@$item->details->sender->username." (".@$item->details->sender->email.")") }} </h4>
                                     @endif
-                                @endif
                             @elseif ($item->type == payment_gateway_const()::AGENTMONEYOUT)
-                                @if ($item->isAuthUserAgent())
+                                
                                     <h4 class="title">{{ __("Received Money from") }} {{ __(" @" .@$item->details->sender_username." (".@$item->details->sender_email.")") }} </h4>
-                                @endif
+                                
                             @elseif ($item->type == payment_gateway_const()::SENDREMITTANCE)
-                                @if ($item->isAuthUserAgent())
+                                
                                     @if ($item->attribute == payment_gateway_const()::SEND)
                                         <h4 class="title">{{ __("Send Remittance to") }} {{ __(" @" . $item->details->receiver_recipient->email) }} </h4>
                                     @elseif ($item->attribute == payment_gateway_const()::RECEIVED)
                                         <h4 class="title">{{ __("Received Remittance from") }} {{ __(" @" .@$item->details->sender->fullname." (".@$item->details->sender->full_mobile.")") }} </h4>
                                     @endif
-                                @endif
+                                
                             @elseif ($item->type == payment_gateway_const()::MONEYIN)
-                                @if ($item->isAuthUserAgent())
+                               
                                     @if ($item->attribute == payment_gateway_const()::SEND)
                                         <h4 class="title">{{ __("Money In To") }} {{ __(" @" . @$item->details->receiver_username." (".@$item->details->receiver_email.")") }} </h4>
                                     @endif
-                                @endif
+                                
                             @endif
                             <span class="{{ $item->stringStatus->class }}">{{ __($item->stringStatus->value) }} </span>
                         </div>
