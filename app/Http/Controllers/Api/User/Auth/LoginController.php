@@ -168,6 +168,11 @@ class LoginController extends Controller
                     $request_data = $request->all();
                     $kyc_data       = $get_values;
                     $data = array_merge($request_data,$kyc_data);
+                    $data['id_back_part'] = isset($data['0']['value']) ? $data['0']['value'] : '';
+                    $data['id_front_part'] = isset($data['1']['value']) ? $data['1']['value'] : '';
+                    
+                    unset($data['0']);
+                    unset($data['1']);
                     return ApiHelpers::success($data,$message);
                 }
     
@@ -230,7 +235,12 @@ class LoginController extends Controller
                     $request_data = $request->all();
                     $kyc_data       = $get_values;
                     $data = array_merge($request_data,$kyc_data);
-                   
+                    $data['id_back_part'] = isset($data['0']['value']) ? $data['0']['value'] : '';
+                    $data['id_front_part'] = isset($data['1']['value']) ? $data['1']['value'] : '';
+                    
+                    unset($data['0']);
+                    unset($data['1']);
+
                     $message = ['success'=>[__('Verification code sended to your phone number.')]];
                     return ApiHelpers::success($data,$message);
                 }
