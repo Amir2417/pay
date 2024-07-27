@@ -84,9 +84,9 @@ Route::prefix('user')->group(function(){
         Route::post('check/email/exist',[AuthorizationController::class,'checkEmailExist']);
         Route::post('send/email/otp', [AuthorizationController::class,'sendEmailOtp']);
         Route::post('send/sms/otp', [AuthorizationController::class,'sendSMSOtp']);
-        Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
+        
         Route::post('verify/email',[AuthorizationController::class,"verifyEmail"]);
-        Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
+        
         Route::post('verify/sms',[AuthorizationController::class,"verifySms"]);
         Route::post('resend/email/otp',[AuthorizationController::class,"resendEmailOtp"]);
         Route::post('resend/sms/otp',[AuthorizationController::class,"resendSMSOtp"]);
@@ -110,185 +110,191 @@ Route::prefix('user')->group(function(){
         Route::post('sms-verify', [AuthorizationController::class,'smsVerify']);
     });
 
-    Route::middleware(['auth.api','verification.guard.api'])->group(function(){
-        Route::get('logout', [LoginController::class,'logout']);
-        Route::get('kyc', [AuthorizationController::class,'showKycFrom']);
-        Route::post('kyc/submit', [AuthorizationController::class,'kycSubmit']);
-        Route::post('google/2fa/verify', [SecurityController::class,'verifyGoogle2Fa']);
-        Route::middleware(['CheckStatusApiUser','user.google.two.factor.api'])->group(function () {
-            Route::get('dashboard', [UserController::class,'home']);
-            Route::get('profile', [UserController::class,'profile']);
-            Route::post('profile/update', [UserController::class,'profileUpdate'])->middleware('app.mode.api');
-            Route::post('password/update', [UserController::class,'passwordUpdate'])->middleware('app.mode.api');
-            Route::post('profile/email-verify', [UserController::class,'mailVerify']);
-            Route::post('delete/account', [UserController::class,'deleteAccount'])->middleware('app.mode.api');
-            Route::get('notifications', [UserController::class,'notifications']);
-
-             //virtual card flutterwave
-            Route::middleware('virtual_card_method:flutterwave')->group(function(){
-                Route::controller(VirtualCardController::class)->prefix('my-card')->group(function(){
+    Route::middleware(['auth.api'])->group(function(){
+        Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
+        Route::middleware(['auth.api','verification.guard.api'])->group(function(){
+            Route::get('logout', [LoginController::class,'logout']);
+            Route::get('kyc', [AuthorizationController::class,'showKycFrom']);
+            Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
+            
+            Route::post('kyc/submit', [AuthorizationController::class,'kycSubmit']);
+            Route::post('google/2fa/verify', [SecurityController::class,'verifyGoogle2Fa']);
+            Route::middleware(['CheckStatusApiUser','user.google.two.factor.api'])->group(function () {
+                Route::get('dashboard', [UserController::class,'home']);
+                Route::get('profile', [UserController::class,'profile']);
+                Route::post('profile/update', [UserController::class,'profileUpdate'])->middleware('app.mode.api');
+                Route::post('password/update', [UserController::class,'passwordUpdate'])->middleware('app.mode.api');
+                Route::post('profile/email-verify', [UserController::class,'mailVerify']);
+                Route::post('delete/account', [UserController::class,'deleteAccount'])->middleware('app.mode.api');
+                Route::get('notifications', [UserController::class,'notifications']);
+    
+                 //virtual card flutterwave
+                Route::middleware('virtual_card_method:flutterwave')->group(function(){
+                    Route::controller(VirtualCardController::class)->prefix('my-card')->group(function(){
+                        Route::get('/','index');
+                        Route::get('charges','charges');
+                        Route::post('create','cardBuy');
+                        Route::post('fund','cardFundConfirm');
+                        Route::get('details','cardDetails');
+                        Route::get('transaction','cardTransaction');
+                        Route::post('block','cardBlock');
+                        Route::post('unblock','cardUnBlock');
+                        Route::post('make-remove/default','makeDefaultOrRemove');
+                    });
+                });
+                 //virtual card sudo
+                Route::middleware('virtual_card_method:sudo')->group(function(){
+                    Route::controller(SudoVirtualCardController::class)->prefix('my-card/sudo')->group(function(){
+                        Route::get('/','index');
+                        Route::get('charges','charges');
+                        Route::get('details','cardDetails');
+                        Route::post('create','cardBuy');
+                        Route::post('fund','cardFundConfirm');
+                        Route::get('details','cardDetails');
+                        Route::get('transaction','cardTransaction');
+                        Route::post('block','cardBlock');
+                        Route::post('unblock','cardUnBlock');
+                        Route::post('make-remove/default','makeDefaultOrRemove');
+                    });
+                });
+                //virtual card stripe
+                Route::middleware('virtual_card_method:stripe')->group(function(){
+                    Route::controller(StripeVirtualController::class)->prefix('my-card/stripe')->group(function(){
+                        Route::get('/','index');
+                        Route::get('details','cardDetails');
+                        Route::post('create','cardBuy');
+                        Route::get('transaction','cardTransaction');
+                        Route::post('inactive','cardInactive');
+                        Route::post('active','cardActive');
+                        Route::post('get/sensitive/data','getSensitiveData');
+                        Route::post('make-remove/default','makeDefaultOrRemove');
+                    });
+                });
+                 //add money
+                Route::controller(AddMoneyController::class)->prefix("add-money")->group(function(){
+                    Route::get('/information','addMoneyInformation');
+                    Route::post('submit-data','submitData');
+                    //manual gateway
+                    Route::post('manual/payment/confirmed','manualPaymentConfirmedApi')->name('api.manual.payment.confirmed');
+    
+                    Route::prefix('payment')->name('api.user.add.money.payment.')->group(function() {
+                        Route::post('crypto/confirm/{trx_id}','cryptoPaymentConfirm')->name('crypto.confirm');
+                    });
+    
+                    //redirect with Btn Pay
+                    Route::get('redirect/btn/checkout/{gateway}', 'redirectBtnPay')->name('api.user.add.money.payment.btn.pay')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
+    
+                    // Global Gateway Response Routes
+                    Route::get('success/response/{gateway}','successGlobal')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api'])->name("api.user.add.money.payment.global.success");
+                    Route::get("cancel/response/{gateway}",'cancelGlobal')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api'])->name("api.user.add.money.payment.global.cancel");
+    
+                    // POST Route For Unauthenticated Request
+                    Route::post('success/response/{gateway}', 'postSuccess')->name('api.user.add.money.payment.global.success')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
+                    Route::post('cancel/response/{gateway}', 'postCancel')->name('api.user.add.money.payment.global.cancel')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
+    
+                });
+                //Receive Money
+                Route::controller(ReceiveMoneyController::class)->prefix('receive-money')->group(function(){
                     Route::get('/','index');
-                    Route::get('charges','charges');
-                    Route::post('create','cardBuy');
-                    Route::post('fund','cardFundConfirm');
-                    Route::get('details','cardDetails');
-                    Route::get('transaction','cardTransaction');
-                    Route::post('block','cardBlock');
-                    Route::post('unblock','cardUnBlock');
-                    Route::post('make-remove/default','makeDefaultOrRemove');
                 });
-            });
-             //virtual card sudo
-            Route::middleware('virtual_card_method:sudo')->group(function(){
-                Route::controller(SudoVirtualCardController::class)->prefix('my-card/sudo')->group(function(){
+                 //Send Money
+                Route::controller(SendMoneyController::class)->prefix('send-money')->group(function(){
+                    Route::get('info','sendMoneyInfo');
+                    Route::post('exist','checkUser');
+                    Route::post('qr/scan','qrScan');
+                    Route::post('confirmed','confirmedSendMoney');
+                });
+                 //Agent Money Out
+                Route::controller(AgentMoneyOutController::class)->prefix('money-out')->group(function(){
+                    Route::get('info','index');
+                    Route::post('confirmed','confirmed')->middleware('api.kyc');
+                    Route::post('check/agent','checkAgent');
+                    Route::post('qr/scan','qrScan');
+                });
+    
+                //request Money
+                Route::controller(RequestMoneyController::class)->prefix("request-money")->group(function(){
+                    Route::get('/','index')->name('index');
+                    Route::post('submit','submit')->name('submit')->middleware('api.kyc');
+                    Route::post('check/user','checkUser');
+                    Route::post('qr/scan','qrScan');
+                    Route::prefix("logs")->name("log.")->middleware("kyc.verification.guard")->group(function(){
+                        Route::get('/','logLists')->name('list');
+                        Route::post('approve','approved')->name('approve')->middleware('api.kyc');
+                        Route::post('reject','rejected')->name('reject')->middleware('api.kyc');
+                    });
+                });
+                // Payment Link
+                Route::controller(PaymentLinkController::class)->prefix('payment-links/')->group(function(){
+                    Route::get('/', 'index');
+                    Route::post('/store', 'store');
+                    Route::get('/edit', 'edit');
+                    Route::post('/update', 'update');
+                    Route::post('/status', 'status');
+                });
+                //qr code
+                Route::controller(QRCodeController::class)->prefix('qr-codes')->group(function(){
                     Route::get('/','index');
-                    Route::get('charges','charges');
-                    Route::get('details','cardDetails');
-                    Route::post('create','cardBuy');
-                    Route::post('fund','cardFundConfirm');
-                    Route::get('details','cardDetails');
-                    Route::get('transaction','cardTransaction');
-                    Route::post('block','cardBlock');
-                    Route::post('unblock','cardUnBlock');
-                    Route::post('make-remove/default','makeDefaultOrRemove');
                 });
-            });
-            //virtual card stripe
-            Route::middleware('virtual_card_method:stripe')->group(function(){
-                Route::controller(StripeVirtualController::class)->prefix('my-card/stripe')->group(function(){
-                    Route::get('/','index');
-                    Route::get('details','cardDetails');
-                    Route::post('create','cardBuy');
-                    Route::get('transaction','cardTransaction');
-                    Route::post('inactive','cardInactive');
-                    Route::post('active','cardActive');
-                    Route::post('get/sensitive/data','getSensitiveData');
-                    Route::post('make-remove/default','makeDefaultOrRemove');
+    
+    
+                //Withdraw Money
+                Route::controller(MoneyOutController::class)->prefix('withdraw')->group(function(){
+                    Route::get('info','moneyOutInfo');
+                    Route::post('insert','moneyOutInsert');
+                    Route::post('manual/confirmed','moneyOutConfirmed')->name('api.withdraw.manual.confirmed');
+                    Route::post('automatic/confirmed','confirmMoneyOutAutomatic')->name('api.withdraw.automatic.confirmed');
+                   //get flutterWave banks
+                   Route::get('get/flutterwave/banks','getBanks');
                 });
-            });
-             //add money
-            Route::controller(AddMoneyController::class)->prefix("add-money")->group(function(){
-                Route::get('/information','addMoneyInformation');
-                Route::post('submit-data','submitData');
-                //manual gateway
-                Route::post('manual/payment/confirmed','manualPaymentConfirmedApi')->name('api.manual.payment.confirmed');
-
-                Route::prefix('payment')->name('api.user.add.money.payment.')->group(function() {
-                    Route::post('crypto/confirm/{trx_id}','cryptoPaymentConfirm')->name('crypto.confirm');
+                 //Make Payment
+                 Route::controller(MakePaymentController::class)->prefix('make-payment')->group(function(){
+                    Route::get('info','makePaymentInfo');
+                    Route::post('check/merchant','checkMerchant');
+                    Route::post('merchants/scan','qrScan');
+                    Route::post('confirmed','confirmedPayment');
                 });
-
-                //redirect with Btn Pay
-                Route::get('redirect/btn/checkout/{gateway}', 'redirectBtnPay')->name('api.user.add.money.payment.btn.pay')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
-
-                // Global Gateway Response Routes
-                Route::get('success/response/{gateway}','successGlobal')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api'])->name("api.user.add.money.payment.global.success");
-                Route::get("cancel/response/{gateway}",'cancelGlobal')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api'])->name("api.user.add.money.payment.global.cancel");
-
-                // POST Route For Unauthenticated Request
-                Route::post('success/response/{gateway}', 'postSuccess')->name('api.user.add.money.payment.global.success')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
-                Route::post('cancel/response/{gateway}', 'postCancel')->name('api.user.add.money.payment.global.cancel')->withoutMiddleware(['auth:api','auth.api','CheckStatusApiUser','verification.guard.api','user.google.two.factor.api']);
-
-            });
-            //Receive Money
-            Route::controller(ReceiveMoneyController::class)->prefix('receive-money')->group(function(){
-                Route::get('/','index');
-            });
-             //Send Money
-            Route::controller(SendMoneyController::class)->prefix('send-money')->group(function(){
-                Route::get('info','sendMoneyInfo');
-                Route::post('exist','checkUser');
-                Route::post('qr/scan','qrScan');
-                Route::post('confirmed','confirmedSendMoney');
-            });
-             //Agent Money Out
-            Route::controller(AgentMoneyOutController::class)->prefix('money-out')->group(function(){
-                Route::get('info','index');
-                Route::post('confirmed','confirmed')->middleware('api.kyc');
-                Route::post('check/agent','checkAgent');
-                Route::post('qr/scan','qrScan');
-            });
-
-            //request Money
-            Route::controller(RequestMoneyController::class)->prefix("request-money")->group(function(){
-                Route::get('/','index')->name('index');
-                Route::post('submit','submit')->name('submit')->middleware('api.kyc');
-                Route::post('check/user','checkUser');
-                Route::post('qr/scan','qrScan');
-                Route::prefix("logs")->name("log.")->middleware("kyc.verification.guard")->group(function(){
-                    Route::get('/','logLists')->name('list');
-                    Route::post('approve','approved')->name('approve')->middleware('api.kyc');
-                    Route::post('reject','rejected')->name('reject')->middleware('api.kyc');
+                 //Bill Pay
+                Route::controller(BillPayController::class)->prefix('bill-pay')->group(function(){
+                    Route::get('info','billPayInfo');
+                    Route::post('confirmed','billPayConfirmed');
                 });
+                 //mobile top up
+                Route::controller(MobileTopupController::class)->prefix('mobile-topup')->group(function(){
+                    Route::get('info','topUpInfo');
+                    Route::post('confirmed','topUpConfirmed');
+                });
+                 //Saved Recipient
+                Route::controller(RecipientController::class)->prefix('recipient')->group(function(){
+                    Route::get('list','recipientList');
+                    Route::get('save/info','saveRecipientInfo');
+                    Route::get('dynamic/fields','dynamicFields');
+                    Route::post('check/user','checkUser');
+                    Route::post('store','storeRecipient');
+                    Route::get('edit','editRecipient');
+                    Route::post('update','updateRecipient');
+                    Route::post('delete','deleteRecipient');
+                });
+                 //Remittance
+                Route::controller(RemittanceController::class)->prefix('remittance')->group(function(){
+                    Route::get('info','remittanceInfo');
+                    Route::post('confirmed','confirmed');
+                    //for filters
+                    Route::post('get/recipient','getRecipient');
+                    // Route::post('get/recipient/transaction/type','getRecipientByTransType');
+                });
+                 //transactions
+                Route::controller(TransactionController::class)->prefix("transactions")->group(function(){
+                    Route::get('/{slug?}','index');
+                });
+                  //google-2fa
+                  Route::controller(SecurityController::class)->prefix("security")->group(function(){
+                    Route::get('google/2fa/status','google2FA');
+                });
+    
             });
-            // Payment Link
-            Route::controller(PaymentLinkController::class)->prefix('payment-links/')->group(function(){
-                Route::get('/', 'index');
-                Route::post('/store', 'store');
-                Route::get('/edit', 'edit');
-                Route::post('/update', 'update');
-                Route::post('/status', 'status');
-            });
-            //qr code
-            Route::controller(QRCodeController::class)->prefix('qr-codes')->group(function(){
-                Route::get('/','index');
-            });
-
-
-            //Withdraw Money
-            Route::controller(MoneyOutController::class)->prefix('withdraw')->group(function(){
-                Route::get('info','moneyOutInfo');
-                Route::post('insert','moneyOutInsert');
-                Route::post('manual/confirmed','moneyOutConfirmed')->name('api.withdraw.manual.confirmed');
-                Route::post('automatic/confirmed','confirmMoneyOutAutomatic')->name('api.withdraw.automatic.confirmed');
-               //get flutterWave banks
-               Route::get('get/flutterwave/banks','getBanks');
-            });
-             //Make Payment
-             Route::controller(MakePaymentController::class)->prefix('make-payment')->group(function(){
-                Route::get('info','makePaymentInfo');
-                Route::post('check/merchant','checkMerchant');
-                Route::post('merchants/scan','qrScan');
-                Route::post('confirmed','confirmedPayment');
-            });
-             //Bill Pay
-            Route::controller(BillPayController::class)->prefix('bill-pay')->group(function(){
-                Route::get('info','billPayInfo');
-                Route::post('confirmed','billPayConfirmed');
-            });
-             //mobile top up
-            Route::controller(MobileTopupController::class)->prefix('mobile-topup')->group(function(){
-                Route::get('info','topUpInfo');
-                Route::post('confirmed','topUpConfirmed');
-            });
-             //Saved Recipient
-            Route::controller(RecipientController::class)->prefix('recipient')->group(function(){
-                Route::get('list','recipientList');
-                Route::get('save/info','saveRecipientInfo');
-                Route::get('dynamic/fields','dynamicFields');
-                Route::post('check/user','checkUser');
-                Route::post('store','storeRecipient');
-                Route::get('edit','editRecipient');
-                Route::post('update','updateRecipient');
-                Route::post('delete','deleteRecipient');
-            });
-             //Remittance
-            Route::controller(RemittanceController::class)->prefix('remittance')->group(function(){
-                Route::get('info','remittanceInfo');
-                Route::post('confirmed','confirmed');
-                //for filters
-                Route::post('get/recipient','getRecipient');
-                // Route::post('get/recipient/transaction/type','getRecipientByTransType');
-            });
-             //transactions
-            Route::controller(TransactionController::class)->prefix("transactions")->group(function(){
-                Route::get('/{slug?}','index');
-            });
-              //google-2fa
-              Route::controller(SecurityController::class)->prefix("security")->group(function(){
-                Route::get('google/2fa/status','google2FA');
-            });
-
         });
+        
 
     });
 
