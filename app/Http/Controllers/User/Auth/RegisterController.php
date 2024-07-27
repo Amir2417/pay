@@ -129,7 +129,7 @@ class RegisterController extends Controller
             $exist              = User::where('email',$validated['credentials'])->first();
             $exists_agent       = Agent::where('email',$validated['credentials'])->first();
             $exists_merchant    = Merchant::where('email',$validated['credentials'])->first();
-            if( $exist || $exists_agent || $exists_merchant) return back()->with(['error' => [__('User already  exists, please try with another phone number.')]]);
+            if( $exist || $exists_agent || $exists_merchant) return back()->with(['error' => [__('User already  exists, please try with another email address.')]]);
             $code = generate_random_code();
             $data = [
                 'user_id'       => 0,
