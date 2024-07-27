@@ -112,6 +112,8 @@ class LoginController extends Controller
             }
             $validated = $validated->validate();
             $get_values = $this->registerPlaceValueWithFields($user_kyc_fields, $validated);
+        }else{
+            $get_values = [];
         }
         $data = $request->all();
         if($data['email'] == '' && $data['phone'] == ''){
@@ -153,8 +155,11 @@ class LoginController extends Controller
                         $message = ['error'=>[__("Something went wrong! Please try again.")]];
                         return ApiHelpers::error($message);
                     };
+                    $request_data = $request->all();
+                    $kyc_data       = $get_values;
+                    $data = array_merge($request_data,$kyc_data);
                     $message = ['success'=>[__('Verification code sended to your email address.')]];
-                    return ApiHelpers::success($request->all(),$message);
+                    return ApiHelpers::success($data,$message);
                 }
             }else{
                 $email_verified  = true;
@@ -212,8 +217,11 @@ class LoginController extends Controller
                         $message = ['error'=>[__("Something went wrong! Please try again.")]];
                         return ApiHelpers::error($message);
                     };
+                    $request_data = $request->all();
+                    $kyc_data       = $get_values;
+                    $data = array_merge($request_data,$kyc_data);
                     $message = ['success'=>[__('Verification code sended to your phone number.')]];
-                    return ApiHelpers::success($request->all(),$message);
+                    return ApiHelpers::success($data,$message);
                 }
     
             } else{
