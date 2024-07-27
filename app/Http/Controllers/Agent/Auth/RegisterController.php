@@ -78,8 +78,15 @@ class RegisterController extends Controller
         }
         
         $validator = Validator::make($request->all(),[
-            'credentials'           => 'required',
-            'register_type'         => 'required',
+            'register_type' => 'required|in:'.global_const()::PHONE.','.global_const()::EMAIL,
+            'credentials' => ['required', function ($attribute, $value, $fail) use ($request) {
+                if ($request->register_type == global_const()::PHONE && !preg_match('/^[0-9]{10,15}$/', $value)) {
+                    $fail('The ' . $attribute . ' must be a valid phone number.');
+                }
+                if ($request->register_type == global_const()::EMAIL && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $fail('The ' . $attribute . ' must be a valid email address.');
+                }
+            }],
             'agree'                 =>  $agree,
 
         ]);
