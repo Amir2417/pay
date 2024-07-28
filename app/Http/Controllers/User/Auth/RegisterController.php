@@ -813,98 +813,38 @@ class RegisterController extends Controller
                 $exist = User::where('full_mobile',$validated['phone'])->first();
     
                 if($exist) return back()->with(['error' => [__('User already  exists, please try with another Phone.')]]);
-                if($basic_settings->sms_verification == true){
                 
-                    $code = generate_random_code();
-                    $data = [
-                        'user_id'       =>  0,
-                        'phone'         => $validated['phone'],
-                        'code'          => $code,
-                        'token'         => generate_unique_string("user_authorizations","token",200),
-                        'created_at'    => now(),
-                    ];
-                    DB::beginTransaction();
-                    try{
-                        
-                        DB::table("user_authorizations")->insert($data);
-                        Session::put('register_data',[
-                            'validated'     => $validated,
-                            'get_values'     => $get_values
-                        ]);
-                        if($basic_settings->sms_notification == true && $basic_settings->sms_verification == true){
-                            $message = __("Your verification resend code is :code",['code' => $code]);
-                            sendApiSMS($message,$validated['phone']); 
-                        }
-                        DB::commit();
-                    }catch(Exception $e) {
-                        
-                        DB::rollBack();
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-                    };
-                    return redirect()->route('user.sms.otp.send',$data['token'])->with(['success' => [__('Verification code sended to your phone number.')]]);
-                }
-                $data = event(new Registered($user = $this->create($validated)));
                 
-                if( $data && $basic_settings->kyc_verification == true){
-                    $create = [
-                        'user_id'       => $user->id,
-                        'data'          => json_encode($get_values),
-                        'created_at'    => now(),
-                    ];
-            
-                    DB::beginTransaction();
-                    try{
-                        DB::table('user_kyc_data')->updateOrInsert(["user_id" => $user->id],$create);
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::PENDING,
-                        ]);
-                        DB::commit();
-                    }catch(Exception $e) {
-                        DB::rollBack();
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::DEFAULT,
-                        ]);
-            
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+                $code = generate_random_code();
+                $data = [
+                    'user_id'       =>  0,
+                    'phone'         => $validated['phone'],
+                    'code'          => $code,
+                    'token'         => generate_unique_string("user_authorizations","token",200),
+                    'created_at'    => now(),
+                ];
+                DB::beginTransaction();
+                try{
+                    
+                    DB::table("user_authorizations")->insert($data);
+                    Session::put('register_data',[
+                        'validated'     => $validated,
+                        'get_values'     => $get_values
+                    ]);
+                    if($basic_settings->sms_notification == true && $basic_settings->sms_verification == true){
+                        $message = __("Your verification resend code is :code",['code' => $code]);
+                        sendApiSMS($message,$validated['phone']); 
                     }
-         
-                }
-                $request->session()->forget('register_info');
-                $this->guard()->login($user);
-         
-                return $this->registered($request, $user);
-            }else{
-                $data = event(new Registered($user = $this->create($validated)));
+                    DB::commit();
+                }catch(Exception $e) {
+                    
+                    DB::rollBack();
+                    return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
+                };
+                return redirect()->route('user.sms.otp.send',$data['token'])->with(['success' => [__('Verification code sended to your phone number.')]]);
+            
                 
-                if( $data && $basic_settings->kyc_verification == true){
-                    $create = [
-                        'user_id'       => $user->id,
-                        'data'          => json_encode($get_values),
-                        'created_at'    => now(),
-                    ];
-            
-                    DB::beginTransaction();
-                    try{
-                        DB::table('user_kyc_data')->updateOrInsert(["user_id" => $user->id],$create);
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::PENDING,
-                        ]);
-                        DB::commit();
-                    }catch(Exception $e) {
-                        DB::rollBack();
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::DEFAULT,
-                        ]);
-            
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-                    }
-         
-                }
-                $request->session()->forget('register_info');
-                $this->guard()->login($user);
-         
-                return $this->registered($request, $user);
-            } 
+            }
         }
          
        
