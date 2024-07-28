@@ -20,7 +20,7 @@
 
             <label>{{ __("phone Number") }}<span>*</span></label>
             <div class="input-group">
-              <div class="input-group-text phone-code">+{{ @$country->mobile_code }}</div>
+              
               <input class="phone-code" type="hidden" name="mobile_code" value="{{  @$country->mobile_code }}" />
               <input type="text" class="form--control mobile" placeholder="{{ __("enter Mobile Number") }}" name="mobile">
             </div>

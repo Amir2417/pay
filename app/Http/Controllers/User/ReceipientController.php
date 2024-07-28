@@ -90,7 +90,6 @@ class ReceipientController extends Controller
             'lastname'                   =>'required|string',
             'email'                      =>"required|email",
             'mobile'                     =>"required",
-            'mobile_code'                =>'required',
             'city'                       =>'required|string',
             'address'                    =>'required|string',
             'state'                      =>'required|string',
@@ -141,8 +140,7 @@ class ReceipientController extends Controller
         $in['lastname'] = $request->lastname;
         $in['state'] = $request->state;
         $in['email'] = $request->email;
-        $in['mobile_code'] = remove_speacial_char($request->mobile_code);
-      $in['mobile'] = remove_speacial_char($request->mobile_code) == "880"?(int)remove_speacial_char($request->mobile):remove_speacial_char($request->mobile) ;
+        $in['mobile'] = remove_speacial_char($request->mobile) ;
         $in['city'] = $request->city;
         $in['address'] = $request->address;
         $in['zip_code'] = $request->zip;
@@ -191,7 +189,6 @@ class ReceipientController extends Controller
         'lastname'                      =>'required|string',
         'email'                      =>"required|email",
         'mobile'                      =>"required",
-        'mobile_code'                      =>'required',
         'city'                      =>'required|string',
         'address'                      =>'required|string',
         'state'                      =>'required|string',
@@ -241,8 +238,7 @@ class ReceipientController extends Controller
         $in['lastname'] = $request->lastname;
         $in['state'] = $request->state;
         $in['email'] = $request->email;
-        $in['mobile_code'] = remove_speacial_char($request->mobile_code);
-      $in['mobile'] = remove_speacial_char($request->mobile_code) == "880"?(int)remove_speacial_char($request->mobile):remove_speacial_char($request->mobile) ;
+        $in['mobile'] = remove_speacial_char($request->mobile) ;
         $in['city'] = $request->city;
         $in['address'] = $request->address;
         $in['zip_code'] = $request->zip;

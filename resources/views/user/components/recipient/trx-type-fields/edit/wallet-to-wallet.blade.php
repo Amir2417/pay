@@ -18,8 +18,6 @@
         <div class="col-xl-4 col-lg-4 col-md-6 form-group">
             <label>{{ __("phone Number") }}<span>*</span></label>
             <div class="input-group">
-              <div class="input-group-text phone-code">+{{ @$data->mobile_code }}</div>
-              <input class="phone-code" type="hidden" name="mobile_code" value="{{ @$data->mobile_code }}"/>
               <input type="text" class="form--control mobile" placeholder="{{ __("enter Mobile Number") }}" name="mobile" value="{{ @$data->mobile }}">
             </div>
         </div>

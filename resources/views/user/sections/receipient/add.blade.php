@@ -40,8 +40,6 @@
                                         <option value="cash-pickup" {{ @$token->transacion_type ==  'cash-pickup' ? 'selected':''}} data-name="Cash Pickup">{{__("rcash-pickup")}}</option>
                                     </select>
                                 </div>
-
-
                                 <div class="col-xl-12 col-lg-12">
                                     <button type="submit" class="btn--base w-100 btn-loading transfer">{{ __("Add Receipient") }} <i class="fas fa-plus-circle ms-1"></i></button>
                                 </div>
@@ -59,7 +57,7 @@
 
 <script>
     $("select.trx-type-select").change(function() {
-            getTrxFields($(this).val());
+        getTrxFields($(this).val());
     });
     $(document).on("change",".country-select",function() {
         var phoneCode = $("select[name=country] :selected").attr("data-mobile-code");
@@ -120,18 +118,12 @@
 
                 if(response.data == null) {
                     if(errorPlace != null) {
-                        // $(errorPlace).css('border','none');
-                        // if($(errorPlace).parent().find(".get-user-error").length > 0) {
-                        //     // $(errorPlace).parent().find(".get-user-error").text("User doesn't exists");
-                        //     throwMessage('error',["User doesn't  exists."]);
-                        // }else {
-                        //     $(`<span class="text--danger get-user-error mt-2">User doesn't exists!</span>`).insertAfter($(errorPlace));
-                        // }
+                        
                         $(errorPlace).parents("form").find("input[name=address]").val("");
                         $(errorPlace).parents("form").find("input[name=lastname]").val("");
                         $(errorPlace).parents("form").find("input[name=firstname]").val("");
                         $(errorPlace).parents("form").find("input[name=zip]").val("");
-                        $(errorPlace).parents("form").find("input[name=mobile_code]").val("");
+                        
                         $(errorPlace).parents("form").find("input[name=mobile]").val("");
                         $(errorPlace).parents("form").find("input[name=state]").val("");
                         $(errorPlace).parents("form").find("input[name=city]").val("");
@@ -155,7 +147,6 @@
                         firstname: user.firstname,
                         lastname: user.lastname,
                         middlename: user.middlename,
-                        mobile_code: user.mobile_code,
                         email: user.email,
                         mobile: user.mobile,
                         address: user.address.address ?? "",
@@ -200,7 +191,7 @@
                         stateSelect(".state-select",$(".state-select"));
                         // $(errorPlace).parents("form").find("input[name=zip]").val("").removeAttr("readonly");
                         $(errorPlace).parents("form").find("input[name=zip]").val("").removeAttr("readonly");
-                        $(errorPlace).parents("form").find("input[name=mobile_code]").val("").removeAttr("readonly");
+                        
                         $(errorPlace).parents("form").find("input[name=mobile]").val("").removeAttr("readonly");
                         $(errorPlace).parents("form").find("input[name=state]").val("").removeAttr("readonly");
                         $(errorPlace).parents("form").find("input[name=city]").val("").removeAttr("readonly");
