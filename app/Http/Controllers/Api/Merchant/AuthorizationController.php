@@ -436,7 +436,7 @@ class AuthorizationController extends Controller
      */
     public function verifyOtp(Request $request){
         $validator = Validator::make($request->all(), [
-            'email'     => "required|email",
+            'phone'     => "required",
             'code'    => "required|max:6",
         ]);
         if($validator->fails()){
@@ -445,7 +445,7 @@ class AuthorizationController extends Controller
         }
         $code = $request->code;
         $otp_exp_sec = BasicSettingsProvider::get()->merchant_otp_exp_seconds ?? GlobalConst::DEFAULT_TOKEN_EXP_SEC;
-        $auth_column = MerchantAuthorization::where("email",$request->email)->first();
+        $auth_column = MerchantAuthorization::where("phone",$request->phone)->first();
         if(!$auth_column){
             $message = ['error'=>[__('Invalied request')]];
             return Helpers::error($message);
