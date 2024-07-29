@@ -21,7 +21,6 @@ class CheckStatusApiUser
     public function handle(Request $request, Closure $next)
     {
         $user = auth()->user();
-
         if((Auth::user()->email_verified == 1 ) && (Auth::user()->sms_verified == 1 ) && (Auth::user()->status == 1)){
             return $next($request);
         }else{
