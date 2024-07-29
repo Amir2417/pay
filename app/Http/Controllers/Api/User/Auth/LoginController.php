@@ -279,7 +279,7 @@ class LoginController extends Controller
                 ];
                 $user->status           = 1;
                 $user->sms_verified     = true;
-                $user->email_verified   = false;
+                $user->email_verified   = true;
                 $user->kyc_verified     = ($basic_settings->kyc_verification == true) ? false : true;
                 $user->save();
                 if( $user && $basic_settings->kyc_verification == true){
