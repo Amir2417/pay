@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware\Agent;
 
-use App\Http\Helpers\Api\Helpers;
-use App\Http\Helpers\ResponseHelper;
 use Closure;
 use Illuminate\Http\Request;
+use App\Http\Helpers\Api\Helpers;
+use App\Models\Admin\BasicSettings;
+use App\Http\Helpers\ResponseHelper;
 use Illuminate\Support\Facades\Auth;
 
 class CheckStatusApi
@@ -29,11 +30,19 @@ class CheckStatusApi
             if(Auth::user()->status == 0){
                 $error = ['errors'=>[__('Account Is Deactivated')]];
                 return Helpers::error($error);
-            }elseif($user->email_verified == 0){;
-                return agentMailVerificationTemplateApi($user);
-            }else if($user->sms_verified == 0){
-                return agentSmsVerificationTemplateApi($user);
             }
+            $basic_settings = BasicSettings::first();
+            if($basic_settings->merchant_email_verification == true){
+                if($user->email_verified == 0){;
+                    return agentMailVerificationTemplateApi($user);
+                }
+            }
+            if($basic_settings->merchant_sms_verification == true){
+                if($user->sms_verified == 0){;
+                    return agentSmsVerificationTemplateApi($user);
+                }
+            }
+            
         }
     }
 }
