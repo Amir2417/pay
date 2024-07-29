@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('basic_settings', function (Blueprint $table) {
             $table->string('sms_api')->nullable()->after('sms_config');
-            $table->string('sms_notification')->nullable()->after('email_notification');
+            $table->boolean('sms_notification')->nullable()->after('email_notification');
         });
     }
 
