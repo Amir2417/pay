@@ -873,11 +873,17 @@ class RegisterController extends Controller
             $agree = '';
         }
 
+        if( $basic_settings->agent_email_verification){
+            $email_field ='required';
+        }else{
+            $email_field ='nullable';
+        }
+
         return Validator::make($data,[
             'firstname'     => 'required|string|max:60',
             'lastname'      => 'required|string|max:60',
             'store_name'    => 'required|string|max:100',
-            'email'         => 'nullable',
+            'email'         => $email_field,
             'username'      => 'required',
             'password'      =>  $passowrd_rule,
             'country'       => 'required|string|max:150',

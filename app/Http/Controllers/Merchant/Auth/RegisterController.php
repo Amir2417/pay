@@ -875,13 +875,17 @@ class RegisterController extends Controller
         }else{
             $agree = '';
         }
-        
+        if( $basic_settings->merchant_email_verification){
+            $email_field ='required';
+        }else{
+            $email_field ='nullable';
+        }
         
         return Validator::make($data,[
             'firstname'     => 'required|string|max:60',
             'lastname'      => 'required|string|max:60',
             'business_name' => 'required|string|max:60',
-            'email'         => 'nullable',
+            'email'         => $email_field,
             'password'      => $passowrd_rule,
             'username'      => 'required',
             'country'       => 'required|string|max:150',

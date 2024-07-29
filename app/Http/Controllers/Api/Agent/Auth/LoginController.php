@@ -328,7 +328,7 @@ class LoginController extends Controller
                     'state' => isset($data['state']) ? $data['state'] : '',
                 ];
                 $user->status = 1;
-                $user->email_verified   = false;
+                $user->email_verified   = true;
                 $user->sms_verified =  true;
                 $user->kyc_verified =  ($basic_settings->agent_kyc_verification == true) ? false : true;
                 $user->save();
