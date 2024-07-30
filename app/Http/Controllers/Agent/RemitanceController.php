@@ -115,7 +115,7 @@ class RemitanceController extends Controller
                 if($sender){
                     $this->insertSenderCharges( $sender,$charges,$user,$receiver_recipient);
                     if( $basic_setting->agent_sms_notification == true){
-                        $message = __("Send Remittance" . " "  . getAmount($charges->sender_amount,4) . ' ' . $charges->sender_cur_code .  ", to " . @$receiver_recipient->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Send Remittance" . " "  . getAmount($charges->sender_amount) . ' ' . $charges->sender_cur_code .  ", to " . @$receiver_recipient->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                         
                        sendApiSMS($message,@$user->full_mobile);
                     }
@@ -133,7 +133,7 @@ class RemitanceController extends Controller
                 if($sender){
                         $this->insertSenderCharges($sender,$charges,$user,$receiver_recipient);
                     if( $basic_setting->agent_sms_notification == true){
-                        $message = __("Send Remittance" . " "  . getAmount($charges->sender_amount,4) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Send Remittance" . " "  . getAmount($charges->sender_amount) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                         
                        sendApiSMS($message,@$user->full_mobile);
                     }

@@ -157,7 +157,7 @@ class BillPayController extends Controller
             $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender);
             //send notifications
             if( $basic_setting->sms_notification == true){
-                $message = __("Bill Pay" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                $message = __("Bill Pay" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                sendApiSMS($message,@$user->full_mobile);
             }
             $message =  ['success'=>[__('Bill pay request sent to admin successful')]];

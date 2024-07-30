@@ -204,7 +204,7 @@ class AuthorizationController extends Controller
             AgentAuthorization::where("agent_id",$user->id)->delete();
             DB::table("agent_authorizations")->insert($data);
             $message = __("Your authorization resend code is :code",['code' => $code]);
-            //sendApiSMS($message,$user->full_mobile);  
+            sendApiSMS($message,$user->full_mobile);  
             DB::commit();
         }catch(Exception $e) {
             DB::rollBack();

@@ -313,7 +313,7 @@ class SudoVirtualCardController extends Controller
                 $this->insertBuyCardCharge( $fixedCharge,$percent_charge, $total_charge,$user,$sender,$v_card->maskedPan);
                 if( $basic_setting->sms_notification == true){
                     
-                    $message = __("Virtual Card (Buy Card)" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                    $message = __("Virtual Card (Buy Card)" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                    sendApiSMS($message,@$user->full_mobile);
                     
                 }
@@ -451,7 +451,7 @@ class SudoVirtualCardController extends Controller
             $this->insertFundCardCharge( $fixedCharge,$percent_charge, $total_charge,$user,$sender,$myCard->maskedPan,$amount);
             if($basic_setting->sms_notification == true){
                 
-                $message = __("Virtual Card (Fund Amount)" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                $message = __("Virtual Card (Fund Amount)" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                sendApiSMS($message,@$user->full_mobile);
             }
             return redirect()->route("user.sudo.virtual.card.index")->with(['success' => [__('Card Funded Successfully')]]);

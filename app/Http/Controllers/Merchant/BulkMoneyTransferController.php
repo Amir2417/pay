@@ -248,7 +248,7 @@ class BulkMoneyTransferController extends Controller
             $this->updateMerchantWalletBalance($merchant_wallet,$available_balance);
 
             if($basic_settings->merchant_sms_notification == true){
-                $message = __("Bulk Money Transfer" . " "  . get_amount($amount,4) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' successfully sended to all accounts.';
+                $message = __("Bulk Money Transfer" . " "  . get_amount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' successfully sended to all accounts.';
                sendApiSMS($message,@$user->full_mobile);
             }
 
@@ -360,7 +360,7 @@ class BulkMoneyTransferController extends Controller
                 $this->insertFeesAndCharges($id,$fixed_charge,$percent_charge,$total_charge);
 
                 if($basic_settings->merchant_sms_notification == true){
-                    $message = __("Bulk Money" . " "  . get_amount($data->amount,4) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
+                    $message = __("Bulk Money" . " "  . get_amount($data->amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
                    sendApiSMS($message,@$user->full_mobile);
                 }
                 DB::commit();
@@ -406,7 +406,7 @@ class BulkMoneyTransferController extends Controller
                 $this->agentNotification($agent,$data->amount);
                 $this->insertFeesAndCharges($id,$fixed_charge,$percent_charge,$total_charge);
                 if($basic_settings->merchant_sms_notification == true){
-                    $message = __("Bulk Money" . " "  . get_amount($data->amount,4) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
+                    $message = __("Bulk Money" . " "  . get_amount($data->amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
                    sendApiSMS($message,@$agent->full_mobile);
                 }
                 DB::commit();

@@ -111,7 +111,7 @@ class MakePaymentController extends Controller
                 if( $basic_setting->sms_notification == true){
                     
 
-                    $message = __("Make Payment" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . 'to ' . @$receiver->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                    $message = __("Make Payment" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . 'to ' . @$receiver->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                     
                    sendApiSMS($message,@$user->full_mobile);
                 }
@@ -127,7 +127,7 @@ class MakePaymentController extends Controller
                 if( $basic_setting->sms_notification == true){
                     
                     //send notifications
-                    $message = __("Make Payment" . " "  . getAmount($recipient,4).' '.get_default_currency_code() . " " . 'from ' . @$user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                    $message = __("Make Payment" . " "  . getAmount($recipient).' '.get_default_currency_code() . " " . 'from ' . @$user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                     
                    sendApiSMS($message,@$receiver->full_mobile);
                 }

@@ -226,7 +226,7 @@ class SendMoneyController extends Controller
                  try{
                     if( $basic_setting->agent_sms_notification == true){
                         
-                        $message = __("Send Money" . " "  . getAmount($charges['sender_amount'],4) . ' ' . $charges['sender_currency'] .  ", to " . @$receiver_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d').' request sent to admin.');
+                        $message = __("Send Money" . " "  . getAmount($charges['sender_amount']) . ' ' . $charges['sender_currency'] .  ", to " . @$receiver_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d').' request sent to admin.');
                        sendApiSMS($message,@$sender_wallet->agent->full_mobile);
                         
                     }

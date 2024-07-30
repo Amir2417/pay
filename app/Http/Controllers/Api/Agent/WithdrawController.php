@@ -258,7 +258,7 @@ class WithdrawController extends Controller
                 $this->insertDeviceManual($withdrawData,$inserted_id);
                 $track->delete();
                 if( $basic_setting->agent_sms_notification == true){
-                    $message = __("Withdraw money" . " "  . getAmount($withdrawData->charges->requested_amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                    $message = __("Withdraw money" . " "  . getAmount($withdrawData->charges->requested_amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                    sendApiSMS($message,@$user->full_mobile);
                 }
                 $message =  ['success'=>[__('Withdraw money request send to admin successful')]];
@@ -508,7 +508,7 @@ class WithdrawController extends Controller
                     $track->delete();
                     //send notifications
                     if( $basic_setting->agent_sms_notification == true){
-                        $message = __("Withdraw money" . " "  . getAmount($withdrawdata->charges->requested_amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        $message = __("Withdraw money" . " "  . getAmount($withdrawdata->charges->requested_amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$user->full_mobile);
                     }
                     $message =  ['success'=>[__('Withdraw money request send successful')]];

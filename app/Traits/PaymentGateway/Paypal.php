@@ -283,14 +283,14 @@ trait Paypal
                     $user = auth()->guard($api_user_login_guard)->user();
                     if( $basic_setting->sms_notification == true){
                         //send notifications
-                        $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount,4) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
+                        $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
                         
                        sendApiSMS($message,@$user->full_mobile);
                     }
                 }
             }else{
                 if( $basic_setting->sms_notification == true){
-                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount,4) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . " Successfull.";
+                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . " Successfull.";
                     
                     sendApiSMS($message,@$user->full_mobile);
                 }

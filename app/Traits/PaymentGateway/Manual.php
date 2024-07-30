@@ -76,7 +76,7 @@ use ControlDynamicInputFields;
                 $inserted_id = $this->insertRecordManual($output,$get_values,$trx_id);
                 $this->insertChargesManual($output,$inserted_id);
                 if( $basic_setting->sms_notification == true){
-                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount,4) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
+                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
                    sendApiSMS($message,@$user->full_mobile);
                 }
                 $return_url = "user.add.money.index";
@@ -84,7 +84,7 @@ use ControlDynamicInputFields;
                 $inserted_id = $this->insertRecordManualAgent($output,$get_values,$trx_id);
                 $this->insertChargesManualAgent($output,$inserted_id);
                 if( $basic_setting->agent_sms_notification == true){
-                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount,4) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
+                    $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
                    sendApiSMS($message,@$user->full_mobile);
                 }
                 $return_url = $return_url = "agent.add.money.index";

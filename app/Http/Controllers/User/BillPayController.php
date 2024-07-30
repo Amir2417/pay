@@ -91,7 +91,7 @@ class BillPayController extends Controller
                 
                 //send notifications
                 $user = auth()->user();
-                $message = __("Bill Pay" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                $message = __("Bill Pay" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                sendApiSMS($message,@$user->full_mobile);
             }
             return redirect()->route("user.bill.pay.index")->with(['success' => [__('Bill pay request sent to admin successful')]]);

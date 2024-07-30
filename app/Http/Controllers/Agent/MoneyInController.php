@@ -113,7 +113,7 @@ class MoneyInController extends Controller
                 try{
                     if( $basic_setting->agent_sms_notification == true){
                         
-                        $message = __("Money In" . " "  . getAmount($charges['receiver_amount'],4) . ' ' . $charges['receiver_currency'] .  ", From " . @$sender_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Money In" . " "  . getAmount($charges['receiver_amount']) . ' ' . $charges['receiver_currency'] .  ", From " . @$sender_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                        sendApiSMS($message,@$receiver_wallet->user->full_mobile);
                         
                     }

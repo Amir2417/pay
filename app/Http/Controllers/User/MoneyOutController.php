@@ -170,7 +170,7 @@ class MoneyOutController extends Controller
             $this->insertDeviceManual($moneyOutData,$inserted_id);
             session()->forget('moneyoutData');
             if( $basic_setting->sms_notification == true){
-                $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                sendApiSMS($message,@$user->full_mobile);
             }
             return redirect()->route("user.money.out.index")->with(['success' => [__('Withdraw Money Request Send To Admin Successful')]]);
@@ -233,7 +233,7 @@ class MoneyOutController extends Controller
                     session()->forget('moneyoutData');
                     if( $basic_setting->sms_notification == true){
 
-                        $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$user->full_mobile);
                     }
                     return redirect()->route("user.money.out.index")->with(['success' => [__('Withdraw money request send successful')]]);

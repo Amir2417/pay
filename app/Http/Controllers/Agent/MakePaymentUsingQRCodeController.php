@@ -143,9 +143,9 @@ class MakePaymentUsingQRCodeController extends Controller
                 'created_at'                    => now(),
             ]);
             $this->updateUserWalletBalance($agent_wallet,$available_balance);
-            if($basic_settings->sms_notification == true){
-                $message = __("Make Payment" . " "  . getAmount($amount,4) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
-                //sendApiSMS($message,@$user->full_mobile);
+            if($basic_settings->agent_sms_notification == true){
+                $message = __("Make Payment" . " "  . getAmount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
+                sendApiSMS($message,@$user->full_mobile);
             }
 
             DB::commit();
@@ -238,8 +238,8 @@ class MakePaymentUsingQRCodeController extends Controller
                 'created_at'                    => now(),
             ]);
             $this->updateMerchantWalletBalance($receiver_wallet,$available_balance);
-            if($basic_settings->merchant_sms_notification == true){
-                $message = __("Money received" . " "  . getAmount($amount,4) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
+            if($basic_settings->agent_sms_notification == true){
+                $message = __("Money received" . " "  . getAmount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                sendApiSMS($message,@$receiver->full_mobile);
             }
             DB::commit();

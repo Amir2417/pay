@@ -85,13 +85,13 @@ class AgentMoneyOutController extends Controller
                         $notifyDataSender = [
                             'trx_id'  => $trx_id,
                             'title'  => "Money Out to @" . @$receiver_wallet->agent->username." (".@$receiver_wallet->agent->full_mobile.")",
-                            'request_amount'  => getAmount($charges['sender_amount'],4).' '.$charges['sender_currency'],
-                            'payable'   =>  getAmount($charges['payable'],4).' ' .$charges['sender_currency'],
-                            'charges'   => getAmount( $charges['total_charge'], 2).' ' .$charges['sender_currency'],
-                            'received_amount'  => getAmount($charges['receiver_amount'], 2).' ' .$charges['receiver_currency'],
+                            'request_amount'  => getAmount($charges['sender_amount']).' '.$charges['sender_currency'],
+                            'payable'   =>  getAmount($charges['payable']).' ' .$charges['sender_currency'],
+                            'charges'   => getAmount( $charges['total_charge']).' ' .$charges['sender_currency'],
+                            'received_amount'  => getAmount($charges['receiver_amount']).' ' .$charges['receiver_currency'],
                             'status'  => "Success",
                         ];
-                        $message = __("Money Out" . " "  . getAmount($charges['sender_amount'],4).' '.$charges['sender_currency'] . " " . 'to ' . @$receiver_wallet->agent->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        $message = __("Money Out" . " "  . getAmount($charges['sender_amount']).' '.$charges['sender_currency'] . " " . 'to ' . @$receiver_wallet->agent->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$user->full_mobile);
                         //sender notifications
                         $sender_wallet->user->notify(new SenderMail($sender_wallet->user,(object)$notifyDataSender));
@@ -107,7 +107,7 @@ class AgentMoneyOutController extends Controller
                 try{
                     if( $basic_setting->sms_notification == true){
                         
-                        $message = __("Money Out" . " "  . getAmount($charges['sender_amount'],4).' '.$charges['sender_currency'] . " " . 'From ' . @$sender_wallet->user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        $message = __("Money Out" . " "  . getAmount($charges['sender_amount']).' '.$charges['sender_currency'] . " " . 'From ' . @$sender_wallet->user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$receiver_wallet->agent->full_mobile);
                     }
                  }catch(Exception $e){

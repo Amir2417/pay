@@ -144,7 +144,7 @@ class RemitanceController extends Controller
                 }
                 if( $basic_setting->sms_notification == true){
                     //send notifications
-                    $message = __("Send Remittance" . " "  . getAmount($send_amount,4) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                    $message = __("Send Remittance" . " "  . getAmount($send_amount) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                    sendApiSMS($message,@$user->full_mobile);
                 }
             }

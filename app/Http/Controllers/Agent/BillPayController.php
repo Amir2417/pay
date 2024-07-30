@@ -70,8 +70,8 @@ class BillPayController extends Controller
             $sender = $this->insertSender($trx_id,$sender_wallet, $charges, $bill_type,$validated['bill_number']);
             $this->insertSenderCharges($sender,$charges,$sender_wallet);
             if( $this->basic_settings->agent_sms_notification == true){
-                $message = __("Bill Pay" . " "  . getAmount($charges['sender_amount'],4) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
-                //sendApiSMS($message,@$user->full_mobile);
+                $message = __("Bill Pay" . " "  . getAmount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
+                sendApiSMS($message,@$user->full_mobile);
             }
             return back()->with(['success' => [__("Bill pay request sent to admin successful")]]);
         }catch(Exception $e) {

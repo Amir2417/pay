@@ -82,7 +82,7 @@ class MobileTopupController extends Controller
             $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender);
             if( $basic_setting->sms_notification == true){
                 //send notifications
-                $message = __("Mobile Topup" . " "  . getAmount($amount,4).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                $message = __("Mobile Topup" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                sendApiSMS($message,@$user->full_mobile);
             }
             return redirect()->route("user.mobile.topup.index")->with(['success' => [__('Mobile topup request send to admin successful')]]);

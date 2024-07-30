@@ -142,8 +142,8 @@ class WithdrawController extends Controller
 
             if( $basic_setting->agent_sms_notification == true){
 
-                $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                dd($message);
+                $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                
                sendApiSMS($message,@$user->full_mobile);
             }
             session()->forget('moneyoutData');
@@ -211,7 +211,7 @@ class WithdrawController extends Controller
                     $this->insertDeviceManual($moneyOutData,$inserted_id);
                     session()->forget('moneyoutData');
                     if( $basic_setting->agent_sms_notification == true){
-                        $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount,4) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$user->full_mobile);
                     }
                     return redirect()->route("agent.money.out.index")->with(['success' => [__('Withdraw money request send to admin successful')]]);
