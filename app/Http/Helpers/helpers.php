@@ -514,7 +514,7 @@ function files_asset_path($slug)
 
 function get_amount($amount, $currency = null, $precision = null)
 {
-    if (!is_numeric($amount)) return __("Not Number");
+    if (!is_numeric($amount)) return "Not Number";
     if($precision == "double") {
         $amount = (double) $amount;
     }else {
@@ -2008,10 +2008,17 @@ function authWalletBalance(){
 
 
 }
-function getAmount($amount, $length = 8)
+function getAmount($amount, $currency = null, $precision = null)
 {
-    $amount = round($amount, $length);
-    return $amount + 0;
+    if (!is_numeric($amount)) return "Not Number";
+    if($precision == "double") {
+        $amount = (double) $amount;
+    }else {
+        $amount = ($precision) ? number_format($amount, $precision, ".", "") : number_format($amount, 2, ".", "");
+    }
+    if (!$currency) return $amount;
+    $amount = $amount . " " . $currency;
+    return $amount;
 }
 function get_gateway_image($gateway_id){
     if($gateway_id != null){

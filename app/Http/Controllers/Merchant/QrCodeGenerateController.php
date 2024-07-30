@@ -6,10 +6,10 @@ use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Constants\GlobalConst;
-use App\Models\Merchants\QrCodes;
 use App\Http\Controllers\Controller;
 use App\Models\Merchants\MerchantQrCode;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrCodeGenerateController extends Controller
@@ -38,6 +38,11 @@ class QrCodeGenerateController extends Controller
         $validated                  = $validator->validate();
         $validated['merchant_id']   = auth()->user()->id;
         $slug                       = Str::uuid();
+        if(MerchantQrCode::auth()->where('sender_type',$validated['sender_type'])->where('amount',$validated['amount'])->exists()){
+            throw ValidationException::withMessages([
+                'name' => __('The combination of Sender Type and Amount has already been taken.'),
+            ]);
+        }
         if($validated['sender_type'] == GlobalConst::SENDER_TYPE_USER){
             $data                   = [
                 'sender_type'       => GlobalConst::SENDER_TYPE_USER,

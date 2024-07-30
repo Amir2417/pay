@@ -34,7 +34,7 @@
                     <div class="dashbord-item">
                         <div class="dashboard-content">
                             <span class="sub-title">{{__("Total Withdraw")}}</span>
-                            <h3 class="title">{{ getAmount($data['money_out_amount']) }} <span class="text--base">{{ @$baseCurrency->code }}</span></h3>
+                            <h3 class="title">{{ get_amount($data['money_out_amount']) }} <span class="text--base">{{ @$baseCurrency->code }}</span></h3>
                         </div>
                         <div class="dashboard-icon">
                             <i class="fas fa-receipt"></i>
@@ -45,7 +45,7 @@
                     <div class="dashbord-item">
                         <div class="dashboard-content">
                             <span class="sub-title">{{ __("total Received") }}</span>
-                            <h3 class="title">{{ getAmount($data['receive_money']) }} <span class="text--base">{{ @$baseCurrency->code }}</span></h3>
+                            <h3 class="title">{{ get_amount($data['receive_money']) }} <span class="text--base">{{ @$baseCurrency->code }}</span></h3>
                         </div>
                         <div class="dashboard-icon">
                             <i class="fas fa-paper-plane"></i>
@@ -56,7 +56,7 @@
                     <div class="dashbord-item">
                         <div class="dashboard-content">
                             <span class="sub-title">{{ __("Total Transactions") }}</span>
-                            <h3 class="title">{{ getAmount($data['total_transaction']) }} <span class="text--base"></span></h3>
+                            <h3 class="title">{{ get_amount($data['total_transaction']) }} <span class="text--base"></span></h3>
                         </div>
 
                     </div>

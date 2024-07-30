@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Merchants\MerchantQrCode;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Validation\ValidationException;
 
 class QRCodeGenerateController extends Controller
 {
@@ -31,6 +32,11 @@ class QRCodeGenerateController extends Controller
         $validated                  = $validator->validate();
         $validated['merchant_id']   = auth()->user()->id;
         $slug                       = Str::uuid();
+        if(MerchantQrCode::auth()->where('sender_type',$validated['sender_type'])->where('amount',$validated['amount'])->exists()){
+            throw ValidationException::withMessages([
+                'name' => __('The combination of Sender Type and Amount has already been taken.'),
+            ]);
+        }
         if($validated['sender_type'] == GlobalConst::SENDER_TYPE_USER){
             $data                   = [
                 'sender_type'       => GlobalConst::SENDER_TYPE_USER,
