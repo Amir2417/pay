@@ -214,11 +214,11 @@ class RequestMoneyController extends Controller
             if( $basic_setting->sms_notification == true){
 
                 //sender notifications
-                $message = __("Request Money" . " "  . getAmount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
+                $message = __("Request Money" . " "  . get_amount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
                sendApiSMS($message,@$sender_wallet->user->full_mobile);
 
                 //receiver notifications
-                $message = __("Request Money" . " "  . getAmount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", From " . @$sender_wallet->user->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
+                $message = __("Request Money" . " "  . get_amount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", From " . @$sender_wallet->user->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
                sendApiSMS($message,@$receiver->full_mobile);
                 
             }

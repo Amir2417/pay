@@ -131,7 +131,7 @@ class MobileTopupController extends Controller
             if( $basic_setting->agent_sms_notification == true){
                 //send notifications
                 
-                $message = __("Mobile Topup" . " "  . getAmount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
+                $message = __("Mobile Topup" . " "  . get_amount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                sendApiSMS($message,@$sender_wallet->agent->full_mobile);
                 
             }

@@ -2008,17 +2008,10 @@ function authWalletBalance(){
 
 
 }
-function getAmount($amount, $currency = null, $precision = null)
+function getAmount($amount, $length = 8)
 {
-    if (!is_numeric($amount)) return "Not Number";
-    if($precision == "double") {
-        $amount = (double) $amount;
-    }else {
-        $amount = ($precision) ? number_format($amount, $precision, ".", "") : number_format($amount, 2, ".", "");
-    }
-    if (!$currency) return $amount;
-    $amount = $amount . " " . $currency;
-    return $amount;
+    $amount = round($amount, $length);
+    return $amount + 0;
 }
 function get_gateway_image($gateway_id){
     if($gateway_id != null){

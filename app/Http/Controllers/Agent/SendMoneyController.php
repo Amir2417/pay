@@ -93,7 +93,7 @@ class SendMoneyController extends Controller
                  try{
                     if( $basic_setting->agent_sms_notification == true){
                         
-                        $message = __("Send Money" . " "  . getAmount($charges['sender_amount']) . ' ' . $charges['sender_currency'] .  ", to " . @$receiver_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d').' request sent to admin.');
+                        $message = __("Send Money" . " "  . get_amount($charges['sender_amount']) . ' ' . $charges['sender_currency'] .  ", to " . @$receiver_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d').' request sent to admin.');
                        sendApiSMS($message,@$sender_wallet->agent->full_mobile) ;
                         
                     }
@@ -109,7 +109,7 @@ class SendMoneyController extends Controller
                      //Receiver notifications
                     if( $basic_setting->agent_sms_notification == true){
                         
-                        $message = __("Received Money" . " "  . getAmount($charges['receiver_amount']) . ' ' . $charges['receiver_currency'] .  ", from " . @$sender_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Received Money" . " "  . get_amount($charges['receiver_amount']) . ' ' . $charges['receiver_currency'] .  ", from " . @$sender_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                        sendApiSMS($message,@$receiver_wallet->agent->full_mobile);
                         
                     }

@@ -132,7 +132,7 @@ class BillPayController extends Controller
             $this->insertSenderCharges($sender,$charges,$sender_wallet);
             if( $this->basic_settings->agent_sms_notification == true){
                 
-                $message = __("Bill Pay" . " "  . getAmount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
+                $message = __("Bill Pay" . " "  . get_amount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                sendApiSMS($message,@$user->full_mobile);
                 
             }

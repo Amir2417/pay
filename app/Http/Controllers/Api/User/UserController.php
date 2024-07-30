@@ -47,7 +47,7 @@ class UserController extends Controller
 
         $userWallet = UserWallet::where('user_id',$user->id)->get()->map(function($data){
             return[
-                'balance' => getAmount($data->balance,2),
+                'balance' => getAmount($data->balance),
                 'currency' => get_default_currency_code(),
             ];
         })->first();
