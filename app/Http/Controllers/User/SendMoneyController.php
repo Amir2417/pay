@@ -105,7 +105,7 @@ class SendMoneyController extends Controller
                  $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender,$receiver);
                 try{
                     if( $basic_setting->sms_notification == true){
-                        $message = __("Send Money" . " "  . getAmount($amount) . ' ' . $baseCurrency->code .  ", successful to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Send Money" . " "  . get_amount($amount) . ' ' . $baseCurrency->code .  ", successful to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                        sendApiSMS($message,$user->full_mobile);
                     }
 
@@ -120,7 +120,7 @@ class SendMoneyController extends Controller
                  //Receiver notifications
                  try{
                     if( $basic_setting->sms_notification == true){
-                        $message = __("Received Money" . " " . getAmount($recipient) . ' ' . $baseCurrency->code .  " from" .' ' . @$user->username . ' '. "Transaction ID: " . $trx_id .' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                        $message = __("Received Money" . " " . get_amount($recipient) . ' ' . $baseCurrency->code .  " from" .' ' . @$user->username . ' '. "Transaction ID: " . $trx_id .' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                        sendApiSMS($message,$request->phone);
                     }
                  }catch(Exception $e){

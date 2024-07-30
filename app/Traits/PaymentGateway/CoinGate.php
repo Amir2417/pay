@@ -241,7 +241,7 @@ trait CoinGate
             }
         }
         if( $basic_setting->email_notification == true){
-            $message = __("Add Money" . " "  . getAmount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
+            $message = __("Add Money" . " "  . get_amount($output['amount']->requested_amount) . ' ' . $output['amount']->sender_cur_code . " " . ",Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . "Successfull.";
            sendApiSMS($message,@$user->full_mobile);
         }
     }
