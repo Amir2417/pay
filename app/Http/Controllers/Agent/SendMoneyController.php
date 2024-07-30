@@ -36,11 +36,11 @@ class SendMoneyController extends Controller
         return view('agent.sections.send-money.index',compact("page_title",'sendMoneyCharge','transactions'));
     }
     public function checkUser(Request $request){
-        $phone = $request->phone;
-        $exist['data'] = Agent::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $exist['data'] = Agent::where('username',$username)->first();
 
         $user = auth()->user();
-        if(@$exist['data'] && $user->full_mobile == @$exist['data']->full_mobile){
+        if(@$exist['data'] && $user->username == @$exist['data']->username){
             return response()->json(['own'=>__("Can't send money to your own")]);
         }
         return response($exist);
@@ -48,7 +48,7 @@ class SendMoneyController extends Controller
     public function confirmedSendMoney(Request $request){
         $validated = Validator::make($request->all(),[
             'amount' => 'required|numeric|gt:0',
-            'phone'  => 'required'
+            'username'  => 'required'
         ])->validate();
 
         $basic_setting = BasicSettings::first();
@@ -57,12 +57,12 @@ class SendMoneyController extends Controller
         if(!$sender_wallet){
             return back()->with(['error' => [__('Agent wallet not found')]]);
         }
-        if( $sender_wallet->agent->full_mobile == $validated['phone']){
+        if( $sender_wallet->agent->username == $validated['username']){
             return back()->with(['error' => [__("Can't transfer money to your own")]]);
         }
-        $field_name = "full_mobile";
+        $field_name = "username";
         
-        $receiver = Agent::where($field_name,$validated['phone'])->active()->first();
+        $receiver = Agent::where($field_name,$validated['username'])->active()->first();
         if(!$receiver){
             return back()->with(['error' => [__("Receiver doesn't exists or Receiver is temporary banned")]]);
         }

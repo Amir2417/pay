@@ -37,11 +37,11 @@ class RequestMoneyController extends Controller
        return view('user.sections.request-money.index',compact('page_title','sender_wallets','charges','transactions'));
    }
     public function checkUser(Request $request){
-        $phone = $request->phone;
-        $exist['data'] = User::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $exist['data'] = User::where('username',$username)->first();
 
         $user = auth()->user();
-        if(@$exist['data'] && $user->full_mobile == @$exist['data']->full_mobile){
+        if(@$exist['data'] && $user->username == @$exist['data']->username){
             return response()->json(['own'=>__("Can't Request Money To Your Own")]);
         }
         return response($exist);
@@ -50,7 +50,7 @@ class RequestMoneyController extends Controller
         $validated = Validator::make($request->all(),[
             'request_amount'    => "required|numeric|gt:0",
             'currency'          => "required|string|exists:currencies,code",
-            'phone'             => "required",
+            'username'             => "required",
             'remark'            => "nullable|string|max:300"
         ])->validate();
         $basic_setting = BasicSettings::first();
@@ -73,11 +73,11 @@ class RequestMoneyController extends Controller
             return back()->with(['error' => [__('Please follow the transaction limit').' (Min '.$min_amount . ' ' . $sender_wallet->currency->code .' - Max '.$max_amount. ' ' . $sender_wallet->currency->code . ')']]);
         }
 
-        $field_name = "full_mobile";
+        $field_name = "username";
 
-        $receiver = User::where($field_name,$validated['phone'])->active()->first();
+        $receiver = User::where($field_name,$validated['username'])->active()->first();
         if(!$receiver) return back()->with(['error' => [__("Receiver doesn't exists or Receiver is temporary banned")]]);
-        if($receiver->full_mobile == $sender_wallet->user->full_mobile) return back()->with(['error' => [__("Can't Request Money To Your Own")]]);
+        if($receiver->username == $sender_wallet->user->username) return back()->with(['error' => [__("Can't Request Money To Your Own")]]);
 
         $receiver_wallet = UserWallet::where("user_id",$receiver->id)->whereHas("currency",function($q) use ($receiver_currency){
             $q->receiver()->where("code",$receiver_currency->code);
@@ -181,12 +181,12 @@ class RequestMoneyController extends Controller
             ]);
 
              //Push Notifications
-            event(new UserNotificationEvent($notification_content,$sender));
-            send_push_notification(["user-".$sender->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
+            // event(new UserNotificationEvent($notification_content,$sender));
+            // send_push_notification(["user-".$sender->id],[
+            //     'title'     => $notification_content['title'],
+            //     'body'      => $notification_content['message'],
+            //     'icon'      => $notification_content['image'],
+            // ]);
 
             //admin create notifications
             $notification_content['title'] = __('Request Money Send To').' ('.$receiver->username.')';
@@ -228,12 +228,12 @@ class RequestMoneyController extends Controller
             ]);
             DB::commit();
             //Push Notifications
-            event(new UserNotificationEvent($notification_content,$receiver));
-            send_push_notification(["user-".$receiver->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
+            // event(new UserNotificationEvent($notification_content,$receiver));
+            // send_push_notification(["user-".$receiver->id],[
+            //     'title'     => $notification_content['title'],
+            //     'body'      => $notification_content['message'],
+            //     'icon'      => $notification_content['image'],
+            // ]);
 
             //admin notification
             $notification_content['title'] = __('Request Money from').' ('.$sender->username.')';

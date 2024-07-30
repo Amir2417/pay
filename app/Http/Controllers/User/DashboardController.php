@@ -145,7 +145,7 @@ class DashboardController extends Controller
             return response()->json(['error'=>__('Not found')]);
         }
         $data   = [
-            'phone'      => $user->full_mobile,
+            'username'      => $user->username,
             'amount'        => $qrCode->amount,
         ];
         return $data;
@@ -168,7 +168,7 @@ class DashboardController extends Controller
             return response()->json(['error'=>__('Invalid Agent')]);
         }
         $data   = [
-            'phone'         => $user->full_mobile,
+            'username'         => $user->username,
             'amount'        => $qrCode->amount,
         ];
 

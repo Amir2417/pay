@@ -38,11 +38,11 @@ class AgentMoneyOutController extends Controller
         return view('user.sections.agent-money-out.index',compact("page_title",'moneyOutCharge','transactions'));
     }
     public function checkAgent(Request $request){
-        $phone = $request->phone;
-        $exist['data'] = Agent::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $exist['data'] = Agent::where('username',$username)->first();
 
         $user = auth()->user();
-        if(@$exist['data'] && $user->full_mobile == @$exist['data']->full_mobile){
+        if(@$exist['data'] && $user->username == @$exist['data']->username){
             return response()->json(['own'=>__("Can't money out to your own")]);
         }
         return response($exist);
@@ -50,16 +50,16 @@ class AgentMoneyOutController extends Controller
     public function confirmed(Request $request){
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|gt:0',
-            'phone' => 'required'
+            'username' => 'required'
         ]);
         $validated = $validator->validate();
         $basic_setting = BasicSettings::first();
         $sender_wallet = UserWallet::auth()->active()->first();
         if(!$sender_wallet)  return back()->with(['error' => [__('User wallet not found')]]);
-        if( $sender_wallet->user->full_mobile == $validated['phone']) return back()->with(['error' => [__("Can't money out to your own")]]);
-        $field_name = "full_mobile";
+        if( $sender_wallet->user->username == $validated['username']) return back()->with(['error' => [__("Can't money out to your own")]]);
+        $field_name = "username";
         
-        $receiver = Agent::where($field_name,$validated['phone'])->active()->first();
+        $receiver = Agent::where($field_name,$validated['username'])->active()->first();
         if(!$receiver) return back()->with(['error' => [__("Receiver doesn't exists or Receiver is temporary banned")]]);
         $receiver_wallet = AgentWallet::where("agent_id",$receiver->id)->first();
         if(!$receiver_wallet) return back()->with(['error' => [__('Receiver wallet not found')]]);
@@ -92,9 +92,9 @@ class AgentMoneyOutController extends Controller
                             'status'  => "Success",
                         ];
                         $message = __("Money Out" . " "  . get_amount($charges['sender_amount']).' '.$charges['sender_currency'] . " " . 'to ' . @$receiver_wallet->agent->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                       sendApiSMS($message,@$user->full_mobile);
+                        sendApiSMS($message,@$user->full_mobile);
                         //sender notifications
-                        $sender_wallet->user->notify(new SenderMail($sender_wallet->user,(object)$notifyDataSender));
+                        
                     }
                  }catch(Exception $e){
                     //Error Handle

@@ -112,14 +112,14 @@ class AgentMoneyOutController extends Controller
     }
     public function checkAgent(Request $request){
         $validator = Validator::make(request()->all(), [
-            'phone'     => "required",
+            'username'     => "required",
         ]);
         if($validator->fails()){
             $error =  ['error'=>$validator->errors()->all()];
             return Helpers::validation($error);
         }
-        $phone = $request->phone;
-        $exist = Agent::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $exist = Agent::where('username',$username)->first();
         if( !$exist){
             $error = ['error'=>[__("Agent doesn't exists.")]];
             return Helpers::error($error);
@@ -131,7 +131,7 @@ class AgentMoneyOutController extends Controller
             return Helpers::error($error);
         }
         $data =[
-            'agent_phone'   => $exist->full_mobile,
+            'username'   => $exist->username,
         ];
         $message =  ['success'=>[__('Valid agent for transaction.')]];
         return Helpers::success($data,$message);
@@ -165,15 +165,16 @@ class AgentMoneyOutController extends Controller
             return Helpers::error($error);
         }
         $data =[
-            'agent_phone'   => $user->full_mobile,
-            ];
+            'username'   => $user->username,
+            'amount'   => $qrCode->amount,
+        ];
         $message =  ['success'=>[__('QR Scan Result.')]];
         return Helpers::success($data,$message);
     }
     public function confirmed(Request $request){
         $validator = Validator::make(request()->all(), [
-            'amount' => 'required|numeric|gt:0',
-            'phone' => 'required'
+            'amount'    => 'required|numeric|gt:0',
+            'username'  => 'required'
         ]);
         if($validator->fails()){
             $error =  ['error'=>$validator->errors()->all()];
@@ -187,13 +188,13 @@ class AgentMoneyOutController extends Controller
             return Helpers::error($error);
 
         }
-        if( $sender_wallet->user->full_mobile == $validated['phone']){
+        if( $sender_wallet->user->username == $validated['username']){
             $error = ['error'=>[__("Can't Money out to your own")]];
             return Helpers::error($error);
         }
-        $field_name = "full_mobile";
+        $field_name = "username";
         
-        $receiver = Agent::where($field_name,$validated['phone'])->active()->first();
+        $receiver = Agent::where($field_name,$validated['username'])->active()->first();
         if(!$receiver){
             $error = ['error'=>[__("Receiver doesn't exists or Receiver is temporary banned")]];
             return Helpers::error($error);
@@ -230,7 +231,7 @@ class AgentMoneyOutController extends Controller
                     if( $basic_setting->sms_notification == true){
                         
                         $message = __("Money Out" . " "  . get_amount($charges['sender_amount']) . ' ' . $charges['sender_currency'] . " to" . @$receiver_wallet->agent->username . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                       sendApiSMS($message,@$user->full_mobile);
+                        sendApiSMS($message,@$user->full_mobile);
                         
                     }
                 }catch(Exception $e){

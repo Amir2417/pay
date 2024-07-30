@@ -102,21 +102,21 @@ class SendMoneyController extends Controller
     }
     public function checkUser(Request $request){
         $validator = Validator::make(request()->all(), [
-            'phone'     => "required",
+            'username'     => "required",
         ]);
         if($validator->fails()){
             $error =  ['error'=>$validator->errors()->all()];
             return Helpers::validation($error);
         }
-        $column = "full_mobile";
+        $column = "username";
         
-        $exist = User::where($column,$request->phone)->first();
+        $exist = User::where($column,$request->username)->first();
         if( !$exist){
             $error = ['error'=>[__('User not found')]];
             return Helpers::error($error);
         }
         $user = auth()->user();
-        if(@$exist && $user->full_mobile == @$exist->full_mobile){
+        if(@$exist && $user->username == @$exist->username){
              $error = ['error'=>[__("Can't send money to your own")]];
             return Helpers::error($error);
         }
@@ -146,12 +146,13 @@ class SendMoneyController extends Controller
             $error = ['error'=>[__('User not found')]];
             return Helpers::error($error);
         }
-        if( $user->full_mobile == auth()->user()->full_mobile){
+        if( $user->username == auth()->user()->username){
             $error = ['error'=>[__("Can't send money to your own")]];
             return Helpers::error($error);
         }
         $data =[
-            'user_phone'   => $user->full_mobile,
+            'username'   => $user->username,
+            'amount'        => $qrCode->amount,
         ];
         $message =  ['success'=>[__('QR Scan Result.')]];
         return Helpers::success($data,$message);
@@ -160,7 +161,7 @@ class SendMoneyController extends Controller
     public function confirmedSendMoney(Request $request){
         $validator = Validator::make(request()->all(), [
             'amount' => 'required|numeric|gt:0',
-            'phone' => 'required'
+            'username' => 'required'
         ]);
         if($validator->fails()){
             $error =  ['error'=>$validator->errors()->all()];
@@ -194,8 +195,8 @@ class SendMoneyController extends Controller
             return Helpers::error($error);
         }
         $rate = $baseCurrency->rate;
-        $phone = $request->phone;
-        $receiver = User::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $receiver = User::where('username',$username)->first();
         if(!$receiver){
             $error = ['error'=>[__('Receiver not exist')]];
             return Helpers::error($error);
@@ -256,7 +257,7 @@ class SendMoneyController extends Controller
             try{
                 if( $basic_setting->sms_notification == true){
                     $message = __("Received Money" . " " . get_amount( $recipient) . ' ' . get_default_currency_code() .  " from" .' ' . @$user->username . ' '. "Transaction ID: " . $trx_id .' ' . "Date : " . Carbon::now()->format('Y-m-d'));
-                   sendApiSMS($message,$request->phone);
+                   sendApiSMS($message,$request->username);
                 }
             }catch(Exception $e){
                //Error Handler

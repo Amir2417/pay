@@ -104,7 +104,7 @@ class RequestMoneyController extends Controller
         $validator = Validator::make(request()->all(), [
             'request_amount'    => "required|numeric|gt:0",
             'currency'          => "required|string|exists:currencies,code",
-            'phone'             => "required",
+            'username'             => "required",
             'remark'            => "nullable|string|max:300"
         ]);
         if($validator->fails()){
@@ -134,9 +134,9 @@ class RequestMoneyController extends Controller
             return Helpers::error($error);
         }
 
-        $field_name = "full_mobile";
+        $field_name = "username";
 
-        $receiver = User::where($field_name,$validated['phone'])->active()->first();
+        $receiver = User::where($field_name,$validated['username'])->active()->first();
         if(!$receiver){
             $error = ['error'=>[__("Receiver doesn't exists or Receiver is temporary banned")]];
             return Helpers::error($error);
@@ -329,7 +329,7 @@ class RequestMoneyController extends Controller
     public function checkUser(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'phone'     => "required"
+            'username'     => "required"
         ]);
         if($validator->fails()){
             $error =  ['error'=>$validator->errors()->all()];
@@ -337,19 +337,19 @@ class RequestMoneyController extends Controller
         }
         $validated = $validator->validate();
         
-        $field_name = "full_mobile";
+        $field_name = "username";
         
-        $user = User::where($field_name,$validated['phone'])->active()->first();
+        $user = User::where($field_name,$validated['username'])->active()->first();
         if(!$user){
             $error = ['error'=>[__('Invalid User')]];
             return Helpers::error($error);
         }
-        if(auth()->user()->full_mobile == $user->full_mobile){
+        if(auth()->user()->username == $user->username){
             $error = ['error'=>[__("Can't Request Money To Your Own")]];
             return Helpers::error($error);
         }
         $data =[
-            'user_phone'   => $user->full_mobile,
+            'username'   => $user->username,
         ];
         $message =  ['success'=>[__('Valid User For Request Money.')]];
         return Helpers::success($data,$message);
@@ -378,12 +378,12 @@ class RequestMoneyController extends Controller
             $error = ['error'=>[__('Invalid User')]];
             return Helpers::error($error);
         }
-        if(auth()->user()->full_mobile == $user->full_mobile){
+        if(auth()->user()->username == $user->username){
             $error = ['error'=>[__("Can't Request Money To Your Own")]];
             return Helpers::error($error);
         }
         $data   = [
-            'phone'         => $user->full_mobile,
+            'username'         => $user->username,
             'amount'        => $qrCode->amount,
         ];
         $message =  ['success'=>[__('Valid User For Request Money.')]];

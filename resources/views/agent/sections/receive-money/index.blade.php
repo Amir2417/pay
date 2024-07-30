@@ -35,7 +35,7 @@
                                     <div class="col-xl-12 col-lg-12 form-group">
                                         <label>{{ __("qr Address") }}</label>
                                         <div class="input-group">
-                                            <input type="text" class="form--control" value="{{ @$uniqueCode->phone }}" readonly id="referralURL">
+                                            <input type="text" class="form--control" value="{{ @$uniqueCode->username }}" readonly id="referralURL">
                                             <div class="input-group-text copytext" id="copyBoard"><i class="las la-copy"></i></div>
                                         </div>
                                     </div>

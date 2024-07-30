@@ -462,7 +462,7 @@ class LoginController extends Controller
         $data 				= [
 			'receiver_type' => 'Agent',
 			'sender_type' 	=> 'Agent',
-			'phone'			=> $user->full_mobile,
+			'username'			=> $user->username,
 			'amount'		=> null,
 		];
         $in['qr_code'] 		= $data;

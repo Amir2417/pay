@@ -36,11 +36,11 @@ class SendMoneyController extends Controller
         return view('user.sections.send-money.index',compact("page_title",'sendMoneyCharge','transactions'));
     }
     public function checkUser(Request $request){
-        $phone = $request->phone;
-        $exist['data'] = User::where('full_mobile',$phone)->first();
+        $username = $request->username;
+        $exist['data'] = User::where('username',$username)->first();
 
         $user = auth()->user();
-        if(@$exist['data'] && $user->full_mobile == @$exist['data']->full_mobile){
+        if(@$exist['data'] && $user->username == @$exist['data']->username){
             return response()->json(['own'=>__("Can't send money to your own")]);
         }
         return response($exist);
@@ -48,7 +48,7 @@ class SendMoneyController extends Controller
     public function confirmed(Request $request){
         $request->validate([
             'amount' => 'required|numeric|gt:0',
-            'phone' => 'required'
+            'username' => 'required'
         ]);
         $basic_setting = BasicSettings::first();
         $user = auth()->user();
@@ -74,7 +74,7 @@ class SendMoneyController extends Controller
         if(!$baseCurrency){
             return back()->with(['error' => [__('Default currency not found')]]);
         }
-        $receiver = User::where('full_mobile',$request->phone)->first();
+        $receiver = User::where('username',$request->username)->first();
         if(!$receiver){
             return back()->with(['error' => [__('Receiver not exist')]]);
         }
@@ -101,12 +101,14 @@ class SendMoneyController extends Controller
         try{
             $trx_id = $this->trx_id;
             $sender = $this->insertSender( $trx_id,$user,$userWallet,$amount,$recipient,$payable,$receiver);
+            
             if($sender){
                  $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender,$receiver);
+                 
                 try{
                     if( $basic_setting->sms_notification == true){
                         $message = __("Send Money" . " "  . get_amount($amount) . ' ' . $baseCurrency->code .  ", successful to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
-                       sendApiSMS($message,$user->full_mobile);
+                        sendApiSMS($message,$user->full_mobile);
                     }
 
                  }catch(Exception $e){
@@ -180,8 +182,8 @@ class SendMoneyController extends Controller
             DB::table('transaction_charges')->insert([
                 'transaction_id'    => $id,
                 'percent_charge'    => $percent_charge,
-                'fixed_charge'      =>$fixedCharge,
-                'total_charge'      =>$total_charge,
+                'fixed_charge'      => $fixedCharge,
+                'total_charge'      => $total_charge,
                 'created_at'        => now(),
             ]);
             DB::commit();
@@ -198,13 +200,13 @@ class SendMoneyController extends Controller
                 'message'   => $notification_content,
             ]);
 
-             //Push Notifications
-            event(new UserNotificationEvent($notification_content,$user));
-            send_push_notification(["user-".$user->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
+            //Push Notifications
+            // event(new UserNotificationEvent($notification_content,$user));
+            // send_push_notification(["user-".$user->id],[
+            //     'title'     => $notification_content['title'],
+            //     'body'      => $notification_content['message'],
+            //     'icon'      => $notification_content['image'],
+            // ]);
 
             //admin create notifications
             $notification_content['title'] = __('Transfer Money Send To').' ('.$receiver->username.')';
@@ -216,6 +218,7 @@ class SendMoneyController extends Controller
             DB::commit();
 
         }catch(Exception $e) {
+            dd($e->getMessage());
             DB::rollBack();
             throw new Exception(__("Something went wrong! Please try again."));
         }
@@ -285,12 +288,12 @@ class SendMoneyController extends Controller
             ]);
             DB::commit();
             //Push Notifications
-            event(new UserNotificationEvent($notification_content,$receiver));
-            send_push_notification(["user-".$user->id],[
-                'title'     => $notification_content['title'],
-                'body'      => $notification_content['message'],
-                'icon'      => $notification_content['image'],
-            ]);
+            // event(new UserNotificationEvent($notification_content,$receiver));
+            // send_push_notification(["user-".$user->id],[
+            //     'title'     => $notification_content['title'],
+            //     'body'      => $notification_content['message'],
+            //     'icon'      => $notification_content['image'],
+            // ]);
 
             //admin notification
             $notification_content['title'] = __('Transfer Money Received From').' ('.$user->username.')';

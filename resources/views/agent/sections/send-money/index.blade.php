@@ -38,12 +38,12 @@
                                     </div>
                                 </div>
                                 <div class="col-xxl-6 col-xl-12 col-lg-6 form-group paste-wrapper">
-                                    <label>{{ __("Phone") }} ({{ __("Agent") }})<span class="text--base">*</span></label>
+                                    <label>{{ __("Username") }} ({{ __("Agent") }})<span class="text--base">*</span></label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text copytext"><span>{{ __("Phone") }}</span></span>
+                                            <span class="input-group-text copytext"><span>{{ __("Username") }}</span></span>
                                         </div>
-                                        <input type="text" name="phone" class="form--control checkUser" id="username" placeholder="{{ __('Enter Phone Number') }}" value="{{ old('phone') }}" />
+                                        <input type="text" name="username" class="form--control checkUser" id="username" placeholder="{{ __('Enter username') }}" value="{{ old('username') }}" />
                                     </div>
                                     <button type="button" class="paste-badge scan"  data-toggle="tooltip" title="Scan QR"><i class="fas fa-camera"></i></button>
                                     <label class="exist text-start"></label>
@@ -189,7 +189,7 @@
                         // alert(data.error)
                         throwMessage('error',[data.error]);
                     } else {
-                        $("#username").val(data);
+                        $("#username").val(data.username);
                         $("#username").focus()
                     }
                     $('#scanModal').modal('hide')
@@ -213,8 +213,8 @@
             var url = '{{ route('agent.send.money.check.exist') }}';
             var value = $(this).val();
             var token = '{{ csrf_token() }}';
-            if ($(this).attr('name') == 'phone') {
-                var data = {phone:value,_token:token}
+            if ($(this).attr('name') == 'username') {
+                var data = {username:value,_token:token}
 
             }
             $.post(url,data,function(response) {
