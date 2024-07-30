@@ -371,6 +371,7 @@ class UserController extends Controller
         if($validated['email'] != auth()->user()->email){
             $user = auth()->user();
             $code = generate_random_code();
+            $validated['email_status'] = true;
             $data = [
                 'agent_id'      => $user->id,
                 'code'          => $code,
