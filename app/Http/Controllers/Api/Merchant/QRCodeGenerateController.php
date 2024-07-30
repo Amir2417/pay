@@ -33,9 +33,9 @@ class QRCodeGenerateController extends Controller
         $validated['merchant_id']   = auth()->user()->id;
         $slug                       = Str::uuid();
         if(MerchantQrCode::auth()->where('sender_type',$validated['sender_type'])->where('amount',$validated['amount'])->exists()){
-            throw ValidationException::withMessages([
-                'name' => __('The combination of Sender Type and Amount has already been taken.'),
-            ]);
+            
+            $error = ['error'=>[__('The combination of Sender Type and Amount has already been taken.')]];
+            return Helpers::error($error);
         }
         if($validated['sender_type'] == GlobalConst::SENDER_TYPE_USER){
             $data                   = [
