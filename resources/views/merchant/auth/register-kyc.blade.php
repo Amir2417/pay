@@ -54,7 +54,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text copytext">@</span>
                             </div>
-                            <input type="email" name="email" class="form--control" placeholder="Email" value="{{ old('email',@$credentials) }}" @if(@$register_type == global_const()::EMAIL) readonly @endif>
+                            <input type="email" name="email" class="form--control" placeholder="Email" value="{{ old('email',$register_type == global_const()::EMAIL ? $credentials : '') }}" @if(@$register_type == global_const()::EMAIL) readonly @endif>
                         </div>
                     </div>
                     <div class="col-xl-4 col-lg-4 col-md-4 form-group">
@@ -78,7 +78,7 @@
                     </div>
                     <div class="col-xl-4 col-lg-4 form-group">
                         <div class="input-group">
-                            <input type="number" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',@$credentials) }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
+                            <input type="number" class="form--control" placeholder="{{ __("enter Phone Number") }}" name="phone" value="{{ old('phone',$register_type == global_const()::PHONE ? $credentials : '') }}" @if(@$register_type == global_const()::PHONE) readonly @endif>
                         </div>
                     </div>
                     @if($basic_settings->merchant_kyc_verification)
