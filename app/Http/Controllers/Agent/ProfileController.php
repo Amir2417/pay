@@ -16,8 +16,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Notification;
 use App\Providers\Admin\BasicSettingsProvider;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\User\Auth\ProfileUpdateCode;
 use App\Notifications\Merchant\Auth\SendAuthorizationCode as AuthSendAuthorizationCode;
 use App\Notifications\Agent\Auth\SendAuthorizationCode as AgentAuthSendAuthorizationCode;
 
@@ -85,18 +87,18 @@ class ProfileController extends Controller
             ]);
             $basic_settings = BasicSettingsProvider::get();
             $agent              = auth()->user();
+            $code               = generate_random_code();   
             $data = [
-                'agent_id'       => $agent->id,
-                'code'          => generate_random_code(),
+                'agent_id'      => $agent->id,
+                'email'         => $validated['email'],
+                'code'          => $code,
                 'token'         => generate_unique_string("agent_authorizations","token",200),
                 'created_at'    => now(),
             ];
 
             DB::beginTransaction();
             try{
-                if( $basic_settings->agent_email_verification == true){
-                    $agent->notify(new AgentAuthSendAuthorizationCode((object) $data));
-                }
+                Notification::route("mail",$validated['email'])->notify(new ProfileUpdateCode($validated['email'], $code));
                 AgentAuthorization::where("agent_id",$agent->id)->delete();
                 DB::table("agent_authorizations")->insert($data);
 
@@ -128,6 +130,7 @@ class ProfileController extends Controller
     }
     public function resendCode()
     {
+        $validated    = session()->get('profile_update.data');
         $user = auth()->user();
         $resend = AgentAuthorization::where("agent_id",$user->id)->first();
         if( $resend){
@@ -137,10 +140,11 @@ class ProfileController extends Controller
                 ]);
             }
         }
+        $code = generate_random_code();
 
         $data = [
-            'agent_id'       =>  $user->id,
-            'code'          => generate_random_code(),
+            'agent_id'      => $user->id,
+            'code'          => $code,
             'token'         => generate_unique_string("agent_authorizations","token",200),
             'created_at'    => now(),
         ];
@@ -149,7 +153,7 @@ class ProfileController extends Controller
         try{
             AgentAuthorization::where("agent_id",$user->id)->delete();
             DB::table("agent_authorizations")->insert($data);
-            $user->notify(new AgentAuthSendAuthorizationCode((object) $data));
+            Notification::route("mail",$validated['email'])->notify(new ProfileUpdateCode($validated['email'], $code));
             DB::commit();
         }catch(Exception $e) {
             DB::rollBack();

@@ -236,7 +236,7 @@
                             'label'         => __("Merchant Status"),
                             'value'         => old('status',$user->status),
                             'name'          => "status",
-                            'options'       => [__("active") => 1, __("banned") => 0],
+                            'options'       => [__("Active") => 1, __("Banned") => 0],
                             'permission'    => "admin.users.details.update",
                         ])
                     </div>
@@ -251,7 +251,7 @@
                     </div>
                     <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 form-group">
                         @include('admin.components.form.switcher', [
-                            'label'         => __("SMS Verification"),
+                            'label'         => __("Phone Verification"),
                             'value'         => old('sms_verified',$user->sms_verified),
                             'name'          => "sms_verified",
                             'options'       => [__("Verified") => 1, __("Unverified") => 0],
@@ -263,7 +263,7 @@
                             'label'     => __("2FA Verification"),
                             'value'     => old('two_factor_status',$user->two_factor_status),
                             'name'      => "two_factor_status",
-                            'options'       => [ __("Verified") => 1, __("Unverified") => 0],
+                            'options'       => [ __("Enable") => 1, __("Disable") => 0],
                             'permission'    => "admin.users.details.update",
                         ])
                     </div>

@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Admin\TransactionSetting;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Notification;
 use App\Providers\Admin\BasicSettingsProvider;
+use App\Notifications\User\Auth\ProfileUpdateCode;
 use App\Notifications\User\Auth\SendAuthorizationCode;
 
 class UserController extends Controller
@@ -470,27 +472,18 @@ class UserController extends Controller
         }
         if($validated['email'] != auth()->user()->email){
             $user = auth()->user();
-            $resend = UserAuthorization::where("user_id",$user->id)->first();
-            if( $resend){
-                if(Carbon::now() <= $resend->created_at->addMinutes(GlobalConst::USER_VERIFY_RESEND_TIME_MINUTE)) {
-                    $error = ['error'=>[ __("You can resend the verification code after").' '.Carbon::now()->diffInSeconds($resend->created_at->addMinutes(GlobalConst::USER_VERIFY_RESEND_TIME_MINUTE)). ' '.__('seconds')]];
-                    return Helpers::error($error);
-                }
-            }
-            $validated['email_status'] = true;
+            $code   = generate_random_code();
             $data = [
-                'user_id'       =>  $user->id,
-                'code'          => generate_random_code(),
+                'user_id'       => $user->id,
+                'code'          => $code,
                 'token'         => generate_unique_string("user_authorizations","token",200),
                 'created_at'    => now(),
             ];
             DB::beginTransaction();
             try{
-                if($resend) {
-                    UserAuthorization::where("user_id", $user->id)->delete();
-                }
+                
                 DB::table("user_authorizations")->insert($data);
-                $user->notify(new SendAuthorizationCode((object) $data));
+                Notification::route("mail",$validated['email'])->notify(new ProfileUpdateCode($validated['email'], $code));
                 DB::commit();
                 $message =  ['success'=>[__('Verification code sended to your email address.')]];
                 return Helpers::success($validated,$message);

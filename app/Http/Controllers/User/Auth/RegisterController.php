@@ -821,7 +821,7 @@ class RegisterController extends Controller
         }else{
             $agree = '';
         }
-        if( $basic_settings->email_verification){
+        if($basic_settings->email_verification){
             $email_field ='required';
         }else{
             $email_field ='nullable';

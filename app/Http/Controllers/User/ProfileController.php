@@ -16,8 +16,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Notification;
 use App\Providers\Admin\BasicSettingsProvider;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\User\Auth\SendVerifyCode;
+use App\Notifications\User\Auth\ProfileUpdateCode;
 use App\Notifications\User\Auth\SendAuthorizationCode;
 
 class ProfileController extends Controller
@@ -82,9 +85,11 @@ class ProfileController extends Controller
             ]);
             $user               = auth()->user();
             $basic_settings = BasicSettingsProvider::get();
+            $code = generate_random_code();
             $data = [
                 'user_id'       => $user->id,
-                'code'          => generate_random_code(),
+                'email'         => $validated['email'],
+                'code'          => $code,
                 'token'         => generate_unique_string("user_authorizations","token",200),
                 'created_at'    => now(),
             ];
@@ -92,10 +97,7 @@ class ProfileController extends Controller
             DB::beginTransaction();
             try{
 
-                if($basic_settings->email_notification == true){
-                    $user->notify(new SendAuthorizationCode((object) $data));
-                }
-                UserAuthorization::where("user_id",$user->id)->delete();
+                Notification::route("mail",$validated['email'])->notify(new ProfileUpdateCode($validated['email'], $code));
                 DB::table("user_authorizations")->insert($data);
                 DB::commit();
             }catch(Exception $e) {
@@ -125,8 +127,9 @@ class ProfileController extends Controller
     }
     public function resendCode()
     {
+        $validated    = session()->get('profile_update.data');
         $user = auth()->user();
-        $resend = UserAuthorization::where("user_id",$user->id)->first();
+        $resend = UserAuthorization::where("email",$validated['email'])->first();
         if( $resend){
             if(Carbon::now() <= $resend->created_at->addMinutes(GlobalConst::USER_VERIFY_RESEND_TIME_MINUTE)) {
                 throw ValidationException::withMessages([
@@ -134,19 +137,20 @@ class ProfileController extends Controller
                 ]);
             }
         }
-
+        $code = generate_random_code();
         $data = [
-            'user_id'       =>  $user->id,
-            'code'          => generate_random_code(),
+            'user_id'       => $user->id,
+            'email'         => $validated['email'],
+            'code'          => $code,
             'token'         => generate_unique_string("user_authorizations","token",200),
             'created_at'    => now(),
         ];
 
         DB::beginTransaction();
         try{
-            UserAuthorization::where("user_id",$user->id)->delete();
+            UserAuthorization::where("email",$validated['email'])->delete();
             DB::table("user_authorizations")->insert($data);
-            $user->notify(new SendAuthorizationCode((object) $data));
+            Notification::route("mail",$validated['email'])->notify(new ProfileUpdateCode($validated['email'], $code));     
             DB::commit();
         }catch(Exception $e) {
             DB::rollBack();
