@@ -201,12 +201,12 @@ class SendMoneyController extends Controller
             ]);
 
             //Push Notifications
-            // event(new UserNotificationEvent($notification_content,$user));
-            // send_push_notification(["user-".$user->id],[
-            //     'title'     => $notification_content['title'],
-            //     'body'      => $notification_content['message'],
-            //     'icon'      => $notification_content['image'],
-            // ]);
+            event(new UserNotificationEvent($notification_content,$user));
+            send_push_notification(["user-".$user->id],[
+                'title'     => $notification_content['title'],
+                'body'      => $notification_content['message'],
+                'icon'      => $notification_content['image'],
+            ]);
 
             //admin create notifications
             $notification_content['title'] = __('Transfer Money Send To').' ('.$receiver->username.')';
@@ -218,7 +218,6 @@ class SendMoneyController extends Controller
             DB::commit();
 
         }catch(Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
             throw new Exception(__("Something went wrong! Please try again."));
         }
@@ -288,12 +287,12 @@ class SendMoneyController extends Controller
             ]);
             DB::commit();
             //Push Notifications
-            // event(new UserNotificationEvent($notification_content,$receiver));
-            // send_push_notification(["user-".$user->id],[
-            //     'title'     => $notification_content['title'],
-            //     'body'      => $notification_content['message'],
-            //     'icon'      => $notification_content['image'],
-            // ]);
+            event(new UserNotificationEvent($notification_content,$receiver));
+            send_push_notification(["user-".$user->id],[
+                'title'     => $notification_content['title'],
+                'body'      => $notification_content['message'],
+                'icon'      => $notification_content['image'],
+            ]);
 
             //admin notification
             $notification_content['title'] = __('Transfer Money Received From').' ('.$user->username.')';

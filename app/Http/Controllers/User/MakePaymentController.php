@@ -206,12 +206,12 @@ class MakePaymentController extends Controller
                 'message'   => $notification_content,
             ]);
              //Push Notifications
-            //  event(new UserNotificationEvent($notification_content,$user));
-            //  send_push_notification(["user-".$user->id],[
-            //      'title'     => $notification_content['title'],
-            //      'body'      => $notification_content['message'],
-            //      'icon'      => $notification_content['image'],
-            //  ]);
+             event(new UserNotificationEvent($notification_content,$user));
+             send_push_notification(["user-".$user->id],[
+                 'title'     => $notification_content['title'],
+                 'body'      => $notification_content['message'],
+                 'icon'      => $notification_content['image'],
+             ]);
 
             //admin notification
             $notification_content['title'] = __("Make Payment to ")." ".$receiver->fullname.' ' .$amount.' '.get_default_currency_code().' '.__("Successful").' ('.$user->username.')';
@@ -222,7 +222,6 @@ class MakePaymentController extends Controller
             ]);
             DB::commit();
         }catch(Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
             throw new Exception(__("Something went wrong! Please try again."));
         }
@@ -293,12 +292,12 @@ class MakePaymentController extends Controller
             ]);
 
              //Push Notifications
-            //  event(new MerchantNotificationEvent($notification_content,$receiver));
-            //  send_push_notification(["merchant-".$receiver->id],[
-            //      'title'     => $notification_content['title'],
-            //      'body'      => $notification_content['message'],
-            //      'icon'      => $notification_content['image'],
-            //  ]);
+             event(new MerchantNotificationEvent($notification_content,$receiver));
+             send_push_notification(["merchant-".$receiver->id],[
+                 'title'     => $notification_content['title'],
+                 'body'      => $notification_content['message'],
+                 'icon'      => $notification_content['image'],
+             ]);
 
             //admin notification
             $notification_content['title'] = __("Make Payment From")." ".$user->fullname.' ' .$amount.' '.get_default_currency_code().' '.__("Successful").' ('.$receiver->username.')';

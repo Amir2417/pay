@@ -40,8 +40,8 @@ class BasicSettingsSeeder extends Seeder
             ],
             'push_notification_config'  => [
                 "method" => "pusher",
-                "instance_id" => "255ae045-4995-4b74-9caf-b9b5101780df",
-                "primary_key" => "CDBB1D7FC33B562C63019647D3076998A14B97B251F651CB72B3934E49114200"
+                "instance_id" => "8a64125c-73ea-4049-b58b-14891e30564b",
+                "primary_key" => "29DBB15ADF049961A8E732804FC92A3FA251685275022478BC9D18C66696C2A9"
             ],
             'kyc_verification'  => true,
             'mail_config'       => [
