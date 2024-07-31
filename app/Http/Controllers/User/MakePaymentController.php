@@ -123,19 +123,15 @@ class MakePaymentController extends Controller
                     $user->notify(new SenderMail($user,(object)$notifyDataSender));
                 }
                 if($auth_user->email_verified == false && $auth_user->sms_verified == true){
-                    
-
                     $message = __("Make Payment" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . 'to ' . @$receiver->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                    
                     sendApiSMS($message,@$user->full_mobile);
                 }
             }catch(Exception $e){
             //Error Handle
             }
-
             $receiverTrans = $this->insertReceiver( $trx_id,$user,$userWallet,$amount,$recipient,$payable,$receiver,$receiverWallet);
             if($receiverTrans){
-                 $this->insertReceiverCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$receiverTrans,$receiver);
+                $this->insertReceiverCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$receiverTrans,$receiver);
             }
             try{
                 $auth_user  = auth()->user();
@@ -150,16 +146,12 @@ class MakePaymentController extends Controller
                     $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
                 }
                 if($auth_user->email_verified == false && $auth_user->sms_verified == true){
-                    
-                    //send notifications
                     $message = __("Make Payment" . " "  . get_amount($recipient).' '.get_default_currency_code() . " " . 'from ' . @$user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                    
-                   sendApiSMS($message,@$receiver->full_mobile);
+                    sendApiSMS($message,@$receiver->full_mobile);
                 }
             }catch(Exception $e){
-            //Error Handle
+                //Error Handle
             }
-
             return redirect()->route("user.make.payment.index")->with(['success' => [__('Make Payment successful to').' '.$receiver->fullname]]);
         }catch(Exception $e) {
             return back()->with(['error' => [__("Something went wrong! Please try again.")]]);

@@ -261,7 +261,7 @@ class StripeVirtualController extends Controller
             }
         }
 
-       if($created_card['status']  = true){
+        if($created_card['status']  = true){
             $card_info = (object)$created_card['data'];
             $v_card = new StripeVirtualCard();
             $v_card->user_id = $user->id;
@@ -295,21 +295,18 @@ class StripeVirtualController extends Controller
                         'card_amount'  => getAmount( $v_card->amount, 2).' ' .get_default_currency_code(),
                         'card_pan'  => $v_card->maskedPan,
                         'status'  => "Success",
-                      ];
+                    ];
                     $user->notify(new CreateMail($user,(object)$notifyDataSender)); 
                 }
                 if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Virtual Card (Buy Card)" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                     sendApiSMS($message,@$user->full_mobile);
-
                 }
                 return redirect()->route("user.stripe.virtual.card.index")->with(['success' => [__('Virtual Card Buy Successfully')]]);
             }catch(Exception $e){
                 return back()->with(['error' => [__("Something went wrong! Please try again.")]]);
             }
-
-       }
-
+        }
     }
     public function getSensitiveData(Request $request){
         $card_id = $request->card_id;
