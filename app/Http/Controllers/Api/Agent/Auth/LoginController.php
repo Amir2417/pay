@@ -83,7 +83,7 @@ class LoginController extends Controller
         }else{
             $agree ='';
         }
-
+        dd($request->type);
         if( $basic_settings->agent_email_verification){
             $email_field ='required';
         }else{
