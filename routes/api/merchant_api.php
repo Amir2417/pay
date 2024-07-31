@@ -90,7 +90,7 @@ Route::prefix('merchant')->group(function(){
 
         Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
         Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
-        Route::middleware(['CheckStatusApiMerchant','merchant.google.two.factor.api'])->group(function () {
+        Route::middleware(['merchant.google.two.factor.api'])->group(function () {
             Route::get('dashboard', [UserController::class,'home']);
             Route::get('profile', [UserController::class,'profile']);
             Route::post('profile/update', [UserController::class,'profileUpdate'])->middleware('app.mode.api');
