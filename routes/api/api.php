@@ -112,14 +112,14 @@ Route::prefix('user')->group(function(){
 
     Route::middleware(['auth.api'])->group(function(){
         Route::post('verify/email/otp',[AuthorizationController::class,"verifyEmailOtp"]);
-        Route::middleware(['auth.api','verification.guard.api'])->group(function(){
+        Route::middleware(['auth.api'])->group(function(){
             Route::get('logout', [LoginController::class,'logout']);
             Route::get('kyc', [AuthorizationController::class,'showKycFrom']);
             Route::post('verify/sms/otp',[AuthorizationController::class,"verifySmsOtp"]);
             
             Route::post('kyc/submit', [AuthorizationController::class,'kycSubmit']);
             Route::post('google/2fa/verify', [SecurityController::class,'verifyGoogle2Fa']);
-            Route::middleware(['CheckStatusApiUser','user.google.two.factor.api'])->group(function () {
+            Route::middleware(['user.google.two.factor.api'])->group(function () {
                 Route::get('dashboard', [UserController::class,'home']);
                 Route::get('profile', [UserController::class,'profile']);
                 Route::post('profile/update', [UserController::class,'profileUpdate'])->middleware('app.mode.api');
