@@ -195,9 +195,12 @@ class LoginController extends Controller
         if($data['type'] == 'phone'){
             $sms_verified      = true;
             $email_verified    = false;
-        }else{
+        }else if($data['type'] == 'email'){
             $sms_verified     = false;
             $email_verified    = true;
+        }else{
+            $sms_verified     = false;
+            $email_verified    = false; 
         }
         
         //User Create
