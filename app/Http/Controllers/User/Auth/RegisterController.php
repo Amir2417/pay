@@ -103,10 +103,10 @@ class RegisterController extends Controller
             try{
                 if($basic_settings->sms_verification == false){
                     Session::put('register_data',[
-                        'credentials'   => $validated['credentials'],
-                        'register_type' => $validated['register_type'],
-                        'sms_verified'  => false,
-                        'email_verified'  => false,
+                        'credentials'       => $validated['credentials'],
+                        'register_type'     => $validated['register_type'],
+                        'sms_verified'      => false,
+                        'email_verified'    => false,
                     ]);
                     return redirect()->route("user.register.kyc");
                 }
@@ -142,9 +142,9 @@ class RegisterController extends Controller
             try{
                 if($basic_settings->email_verification == false){
                     Session::put('register_data',[
-                        'credentials'   => $validated['credentials'],
-                        'register_type' => $validated['register_type'],
-                        'email_verified'  => false,
+                        'credentials'           => $validated['credentials'],
+                        'register_type'         => $validated['register_type'],
+                        'email_verified'        => false,
                         'sms_verified'          => false
                     ]);
                     return redirect()->route("user.register.kyc");
@@ -193,6 +193,7 @@ class RegisterController extends Controller
             'credentials'           => $auth_column->phone,
             'register_type'         => $register_type,
             'sms_verified'          => true,
+            'email_verified'        => false,
         ]);
         try{
             $auth_column->delete();
@@ -610,196 +611,102 @@ class RegisterController extends Controller
                 'username' => _("The username has already been taken.")
             ]);
         }
-        $validated['mobile']        = remove_speacial_char($validated['phone']);
-        $complete_phone             = $validated['mobile'];
-
-        if(User::where('full_mobile',$complete_phone)->exists()) {
-            throw ValidationException::withMessages([
-                'phone'     => __('Phone number is already exists'),
-            ]);
+        if($request->phone != '' || $request->phone != null){
+            $validated['mobile']        = remove_speacial_char($validated['phone']);
+            $complete_phone             = $validated['mobile'];
+            if(User::where('full_mobile',$complete_phone)->exists()) {
+                throw ValidationException::withMessages([
+                    'phone'     => __('Phone number is already exists'),
+                ]);
+            }
+            if(Agent::where('full_mobile',$complete_phone)->exists()) {
+                throw ValidationException::withMessages([
+                    'phone'     => __('Phone number is already exists in agent.'),
+                ]);
+            }
+            if(Merchant::where('full_mobile',$complete_phone)->exists()) {
+                throw ValidationException::withMessages([
+                    'phone'     => __('Phone number is already exists in merchant.'),
+                ]);
+            }
         }
-        if(Agent::where('full_mobile',$complete_phone)->exists()) {
-            throw ValidationException::withMessages([
-                'phone'     => __('Phone number is already exists in agent.'),
-            ]);
-        }
-        if(Merchant::where('full_mobile',$complete_phone)->exists()) {
-            throw ValidationException::withMessages([
-                'phone'     => __('Phone number is already exists in merchant.'),
-            ]);
-        }
-        $userName = $validated['username'];
-        $validated['full_mobile']       = $complete_phone;
-        $validated = Arr::except($validated,['agree']);
         if($register_data != null && $register_data['sms_verified'] == true){
-            
-            $sms_verified                   = session()->get('register_data.sms_verified');
-            
-            $validated['sms_verified']      = $sms_verified;
-            $validated['kyc_verified']      = ($basic_settings->kyc_verification == true) ? false : true;
-            $validated['password']          = Hash::make($validated['password']);
-            $validated['username']          = $userName;
-            $validated['address']           = [
-                                                'country' => $validated['country'],
-                                                'city' => $validated['city'],
-                                                'zip' => $validated['zip_code'],
-                                                'state' => '',
-                                                'address' => '',
-                                            ];
-    
-                                            
-            if($validated['email'] != '' || $validated['email'] != null){
-                $exist = User::where('email',$validated['email'])->first();
-    
-                if($exist) return back()->with(['error' => [__('User already  exists, please try with another email.')]]);
-                $exist_agent = Agent::where('email',$validated['email'])->first();
-    
-                if($exist_agent) return back()->with(['error' => [__('User already  exists, please try with another email.')]]);
-                $exist_merchant = Merchant::where('email',$validated['email'])->first();
-    
-                if($exist_merchant) return back()->with(['error' => [__('User already  exists, please try with another email.')]]);
-                if($basic_settings->email_verification == true){
-                    $validated['email_verified']    = false;
-
-                    $code = generate_random_code();
-                    $data = [
-                        'user_id'       =>  0,
-                        'email'         => $validated['email'],
-                        'code'          => $code,
-                        'token'         => generate_unique_string("user_authorizations","token",200),
-                        'created_at'    => now(),
-                    ];
-                    DB::beginTransaction();
-                    try{
-                        
-                        DB::table("user_authorizations")->insert($data);
-                        Session::put('register_data',[
-                            'validated'     => $validated,
-                            'get_values'     => $get_values
-                        ]);
-                        if($basic_settings->email_notification == true && $basic_settings->email_verification == true){
-                            Notification::route("mail",$validated['email'])->notify(new SendVerifyCode($validated['email'], $code));
-                        }
-                        DB::commit();
-                    }catch(Exception $e) {
-                        DB::rollBack();
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-                    };
-                    return redirect()->route('user.email.verify',$data['token'])->with(['success' => [__('Verification code sended to your email address.')]]);
-                }
-                $validated['email_verified']    = false;
-                $data = event(new Registered($user = $this->create($validated)));
-                
-                if( $data && $basic_settings->kyc_verification == true){
-                    $create = [
-                        'user_id'       => $user->id,
-                        'data'          => json_encode($get_values),
-                        'created_at'    => now(),
-                    ];
-            
-                    DB::beginTransaction();
-                    try{
-                        DB::table('user_kyc_data')->updateOrInsert(["user_id" => $user->id],$create);
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::PENDING,
-                        ]);
-                        DB::commit();
-                    }catch(Exception $e) {
-                        DB::rollBack();
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::DEFAULT,
-                        ]);
-            
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-                    }
-         
-                }
-                $request->session()->forget('register_info');
-                $this->guard()->login($user);
-         
-                return $this->registered($request, $user);
-            }else{
-                $validated['email_verified']    = true;
-                $data = event(new Registered($user = $this->create($validated)));
-                if( $data && $basic_settings->kyc_verification == true){
-                    $create = [
-                        'user_id'       => $user->id,
-                        'data'          => json_encode($get_values),
-                        'created_at'    => now(),
-                    ];
-            
-                    DB::beginTransaction();
-                    try{
-                        DB::table('user_kyc_data')->updateOrInsert(["user_id" => $user->id],$create);
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::PENDING,
-                        ]);
-                        DB::commit();
-                    }catch(Exception $e) {
-                        DB::rollBack();
-                        $user->update([
-                            'kyc_verified'  => GlobalConst::DEFAULT,
-                        ]);
-            
-                        return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-                    }
-         
-                }
-                $request->session()->forget('register_info');
-                $this->guard()->login($user);
-         
-                return $this->registered($request, $user);
-            }
-             
+            $validated['full_mobile']       = $complete_phone;
         }else{
-            $email_verified                   = session()->get('register_data.email_verified');
-            $validated['sms_verified']      = false;
-            if($register_data['sms_verified'] == false){
-                $validated['email_verified']    = true;
-            }else{
-                $validated['email_verified']    = $email_verified;
-            }
-            $validated['kyc_verified']      = ($basic_settings->kyc_verification == true) ? false : true;
-            $validated['password']          = Hash::make($validated['password']);
-            $validated['username']          = $userName;
-            $validated['address']           = [
-                                                'country' => $validated['country'],
-                                                'city' => $validated['city'],
-                                                'zip' => $validated['zip_code'],
-                                                'state' => '',
-                                                'address' => '',
-                                            ];
+            $validated['full_mobile']       = $request->phone ?? '';
+        }
         
-            $code = generate_random_code();
-            $data = [
-                'user_id'       =>  0,
-                'phone'         => $validated['phone'],
-                'code'          => $code,
-                'token'         => generate_unique_string("user_authorizations","token",200),
+        if($request->email != '' || $request->email != null){
+            if(User::where('email',$request->email)->exists()) {
+                throw ValidationException::withMessages([
+                    'email'     => __('Email is already exists'),
+                ]);
+            }
+            if(Agent::where('email',$request->email)->exists()) {
+                throw ValidationException::withMessages([
+                    'email'     => __('Email is already exists in agent.'),
+                ]);
+            }
+            if(Merchant::where('email',$request->email)->exists()) {
+                throw ValidationException::withMessages([
+                    'email'     => __('Email is already exists in merchant.'),
+                ]);
+            }
+        }
+        if($register_data != null && $register_data['email_verified'] == true){
+            $validated['email']         = $request->email;
+        }else{
+            $validated['email']         = $request->email ?? '';
+        }
+        
+        $userName = $validated['username'];
+        
+        $validated = Arr::except($validated,['agree']);
+            
+        $validated['sms_verified']      = $register_data['sms_verified'];
+        $validated['email_verified']    = $register_data['email_verified'];
+        $validated['kyc_verified']      = ($basic_settings->kyc_verification == true) ? false : true;
+        $validated['password']          = Hash::make($validated['password']);
+        $validated['username']          = $userName;
+        $validated['address']           = [
+                                            'country' => $validated['country'],
+                                            'city' => $validated['city'],
+                                            'zip' => $validated['zip_code'],
+                                            'state' => '',
+                                            'address' => '',
+                                        ];
+
+        $data = event(new Registered($user = $this->create($validated)));
+
+        if( $data && $basic_settings->kyc_verification == true){
+            $create = [
+                'user_id'       => $user->id,
+                'data'          => json_encode($get_values),
                 'created_at'    => now(),
             ];
+    
             DB::beginTransaction();
             try{
-                
-                DB::table("user_authorizations")->insert($data);
-                Session::put('register_data',[
-                    'validated'     => $validated,
-                    'get_values'     => $get_values
+                DB::table('user_kyc_data')->updateOrInsert(["user_id" => $user->id],$create);
+                $user->update([
+                    'kyc_verified'  => GlobalConst::PENDING,
                 ]);
-                
-                $message = __("Your verification resend code is :code",['code' => $code]);
-                sendApiSMS($message,$validated['phone']); 
                 DB::commit();
             }catch(Exception $e) {
-                
                 DB::rollBack();
+                $user->update([
+                    'kyc_verified'  => GlobalConst::DEFAULT,
+                ]);
+    
                 return back()->with(['error' => [__('Something went wrong! Please try again.')]]);
-            };
-            return redirect()->route('user.sms.otp.send',$data['token'])->with(['success' => [__('Verification code sended to your phone number.')]]);
-            
+            }
+    
         }
-         
-       
+        $request->session()->forget('register_info');
+        $this->guard()->login($user);
+    
+        return $this->registered($request, $user);
+        
     }
 
 
@@ -821,10 +728,16 @@ class RegisterController extends Controller
         }else{
             $agree = '';
         }
-        if($basic_settings->email_verification){
-            $email_field ='required';
+        $register_data      = session()->get('register_data');
+        if($register_data['sms_verified'] == true){
+            $phone_field    = 'required';
         }else{
-            $email_field ='nullable';
+            $phone_field    = 'nullable';
+        }
+        if($register_data['email_verified'] == true){
+            $email_field    = 'required';
+        }else{
+            $email_field    = 'nullable';
         }
         
 
@@ -836,7 +749,7 @@ class RegisterController extends Controller
             'country'       => 'required|string|max:150',
             'username'      => 'required',
             'city'          => 'required|string|max:150',
-            'phone'         => 'required',
+            'phone'         => $phone_field,
             'zip_code'      => 'required|string|max:8',
             'agree'         =>  $agree,
         ]);
