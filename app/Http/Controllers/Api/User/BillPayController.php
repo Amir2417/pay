@@ -156,9 +156,25 @@ class BillPayController extends Controller
             $sender = $this->insertSender( $trx_id,$user,$userWallet,$amount, $bill_type, $bill_number,$payable);
             $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender);
             //send notifications
-            if( $basic_setting->sms_notification == true){
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyData = [
+                    'trx_id'  => $trx_id,
+                    'bill_type'  => @$bill_type->name,
+                    'bill_number'  => $bill_number,
+                    'request_amount'   => $amount,
+                    'charges'   => $total_charge,
+                    'payable'  => $payable,
+                    'current_balance'  => getAmount($userWallet->balance, 2),
+                    'status'  => "Pending",
+                ];
+                //send notifications
+                $user = auth()->user();
+                $user->notify(new BillPayMail($user,(object)$notifyData));
+            }
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Bill Pay" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-               sendApiSMS($message,@$user->full_mobile);
+                sendApiSMS($message,@$user->full_mobile);
             }
             $message =  ['success'=>[__('Bill pay request sent to admin successful')]];
             return Helpers::onlysuccess($message);

@@ -228,7 +228,21 @@ class AgentMoneyOutController extends Controller
                 $user       = auth()->user();
                 $this->insertSenderCharges($sender,$charges,$sender_wallet,$receiver_wallet);
                 try{
-                    if( $basic_setting->sms_notification == true){
+                    $auth_user  = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $notifyDataSender = [
+                            'trx_id'  => $trx_id,
+                            'title'  => "Money Out to @" . @$receiver_wallet->agent->username." (".@$receiver_wallet->agent->email.")",
+                            'request_amount'  => getAmount($charges['sender_amount'],2).' '.$charges['sender_currency'],
+                            'payable'   =>  getAmount($charges['payable'],2).' ' .$charges['sender_currency'],
+                            'charges'   => getAmount( $charges['total_charge'], 2).' ' .$charges['sender_currency'],
+                            'received_amount'  => getAmount($charges['receiver_amount'], 2).' ' .$charges['receiver_currency'],
+                            'status'  => "Success",
+                        ];
+                        //sender notifications
+                        $sender_wallet->user->notify(new SenderMail($sender_wallet->user,(object)$notifyDataSender));
+                    }
+                    if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                         
                         $message = __("Money Out" . " "  . get_amount($charges['sender_amount']) . ' ' . $charges['sender_currency'] . " to" . @$receiver_wallet->agent->username . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                         sendApiSMS($message,@$user->full_mobile);
@@ -244,9 +258,20 @@ class AgentMoneyOutController extends Controller
                  $this->insertReceiverCharges($receiverTrans,$charges,$sender_wallet,$receiver_wallet);
                  //Receiver notifications
                 try{
-                    if( $basic_setting->sms_notification == true){
+                    $auth_user  = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $notifyDataReceiver = [
+                            'trx_id'  => $trx_id,
+                            'title'  => "Money Out From @" .@$sender_wallet->user->username." (".@$sender_wallet->user->email.")",
+                            'received_amount'  => getAmount($charges['receiver_amount'], 2).' ' .$charges['receiver_currency'],
+                            'status'  => "Success",
+                        ];
+                        //send notifications
+                        $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Money Out" . " "  . get_amount($charges['receiver_amount']) . ' ' . $charges['receiver_currency'] . " From" . @$sender_wallet->user->username . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                       sendApiSMS($message,@$receiver_wallet->agent->full_mobile);
+                        sendApiSMS($message,@$receiver_wallet->agent->full_mobile);
                         
                     }
                 }catch(Exception $e){

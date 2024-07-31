@@ -17,6 +17,7 @@ use App\Models\Admin\Currency;
 use App\Models\UserNotification;
 use App\Models\AgentNotification;
 use Illuminate\Support\Facades\DB;
+use App\Models\Admin\BasicSettings;
 use App\Constants\NotificationConst;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
@@ -28,8 +29,10 @@ use App\Models\Admin\TransactionSetting;
 use App\Models\Merchants\MerchantWallet;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\BulkMoneyTransferDataExport;
-use App\Models\Admin\BasicSettings;
+use Illuminate\Support\Facades\Notification;
 use App\Models\Merchants\MerchantNotification;
+use App\Notifications\Merchant\BulkMoneyNotification;
+use App\Notifications\Merchant\BulkMoneyReceiveNotification;
 
 class BulkMoneyTransferController extends Controller
 {
@@ -247,9 +250,13 @@ class BulkMoneyTransferController extends Controller
             ]);
             $this->updateMerchantWalletBalance($merchant_wallet,$available_balance);
 
-            if($basic_settings->merchant_sms_notification == true){
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                Notification::route("mail",$auth_user->email)->notify(new BulkMoneyNotification($auth_user,$amount,$trx_id));
+            }
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Bulk Money Transfer" . " "  . get_amount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' successfully sended to all accounts.';
-               sendApiSMS($message,@$user->full_mobile);
+                sendApiSMS($message,@$user->full_mobile);
             }
 
             DB::commit();
@@ -359,9 +366,13 @@ class BulkMoneyTransferController extends Controller
                 $this->userNotification($user,$data->amount);
                 $this->insertFeesAndCharges($id,$fixed_charge,$percent_charge,$total_charge);
 
-                if($basic_settings->merchant_sms_notification == true){
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    Notification::route("mail",$user->email)->notify(new BulkMoneyReceiveNotification($user,$data->amount,$trx_id));
+                }
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Bulk Money" . " "  . get_amount($data->amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
-                   sendApiSMS($message,@$user->full_mobile);
+                    sendApiSMS($message,@$user->full_mobile);
                 }
                 DB::commit();
             }catch(Exception $e) {
@@ -405,9 +416,13 @@ class BulkMoneyTransferController extends Controller
                 $this->updateAgentWalletBalance($available_balance,$agent_wallet);
                 $this->agentNotification($agent,$data->amount);
                 $this->insertFeesAndCharges($id,$fixed_charge,$percent_charge,$total_charge);
-                if($basic_settings->merchant_sms_notification == true){
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    Notification::route("mail",$agent->email)->notify(new BulkMoneyReceiveNotification($agent,$data->amount,$trx_id));
+                }
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Bulk Money" . " "  . get_amount($data->amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' Received.';
-                   sendApiSMS($message,@$agent->full_mobile);
+                    sendApiSMS($message,@$agent->full_mobile);
                 }
                 DB::commit();
             }catch(Exception $e) {

@@ -106,7 +106,21 @@ class SendMoneyController extends Controller
                  $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender,$receiver);
                  
                 try{
-                    if( $basic_setting->sms_notification == true){
+                    $auth_user  = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $notifyDataSender = [
+                            'trx_id'  => $trx_id,
+                            'title'  => "Send Money to @" . @$receiver->username." (".@$receiver->email.")",
+                            'request_amount'  => getAmount($amount,2).' '.get_default_currency_code(),
+                            'payable'   =>  getAmount($payable,2).' ' .get_default_currency_code(),
+                            'charges'   => getAmount( $total_charge, 2).' ' .get_default_currency_code(),
+                            'received_amount'  => getAmount( $recipient, 2).' ' .get_default_currency_code(),
+                            'status'  => "Success",
+                        ];
+                        //sender notifications
+                        $user->notify(new SenderMail($user,(object)$notifyDataSender));
+                    }
+                    if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Send Money" . " "  . get_amount($amount) . ' ' . $baseCurrency->code .  ", successful to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                         sendApiSMS($message,$user->full_mobile);
                     }
@@ -121,9 +135,20 @@ class SendMoneyController extends Controller
                  $this->insertReceiverCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$receiverTrans,$receiver);
                  //Receiver notifications
                  try{
-                    if( $basic_setting->sms_notification == true){
+                    $auth_user  = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $notifyDataReceiver = [
+                            'trx_id'  => $trx_id,
+                            'title'  => "Received Money from @" .@$user->username." (".@$user->email.")",
+                            'received_amount'  => getAmount( $recipient, 2).' ' .get_default_currency_code(),
+                            'status'  => "Success",
+                        ];
+                        //send notifications
+                        $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
+                    }
+                    if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Received Money" . " " . get_amount($recipient) . ' ' . $baseCurrency->code .  " from" .' ' . @$user->username . ' '. "Transaction ID: " . $trx_id .' ' . "Date : " . Carbon::now()->format('Y-m-d'));
-                       sendApiSMS($message,$request->phone);
+                        sendApiSMS($message,$request->phone);
                     }
                  }catch(Exception $e){
                     //Error Handler

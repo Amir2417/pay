@@ -284,10 +284,23 @@ class StripeVirtualController extends Controller
             try{
                 $sender = $this->insertCardBuy( $trx_id,$user,$wallet,$amount, $v_card ,$payable);
                 $this->insertBuyCardCharge( $fixedCharge,$percent_charge, $total_charge,$user,$sender,$v_card->maskedPan);
-                if( $basic_setting->sms_notification == true){
-                    
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    $notifyDataSender = [
+                        'trx_id'  => $trx_id,
+                        'title'  => "Virtual Card (Buy Card)",
+                        'request_amount'  => getAmount($amount,2).' '.get_default_currency_code(),
+                        'payable'   =>  getAmount($payable,2).' ' .get_default_currency_code(),
+                        'charges'   => getAmount( $total_charge, 2).' ' .get_default_currency_code(),
+                        'card_amount'  => getAmount( $v_card->amount, 2).' ' .get_default_currency_code(),
+                        'card_pan'  => $v_card->maskedPan,
+                        'status'  => "Success",
+                      ];
+                    $user->notify(new CreateMail($user,(object)$notifyDataSender)); 
+                }
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Virtual Card (Buy Card)" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                   sendApiSMS($message,@$user->full_mobile);
+                    sendApiSMS($message,@$user->full_mobile);
 
                 }
                 return redirect()->route("user.stripe.virtual.card.index")->with(['success' => [__('Virtual Card Buy Successfully')]]);

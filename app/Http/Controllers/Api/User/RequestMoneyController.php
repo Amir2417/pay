@@ -211,7 +211,33 @@ class RequestMoneyController extends Controller
             if($receiverTrans){
                 $this->insertReceiverCharges($receiverTrans,(object)$charges,$sender_wallet->user,$receiver);
             }
-            if( $basic_setting->sms_notification == true){
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyDataSender = [
+                    'trx_id'  => $trx_id,
+                    'title'  => "Request Money to @" . @$receiver->username." (".@$receiver->email.")",
+                    'request_amount'  => getAmount($charges['request_amount'],2).' '.$charges['sender_currency'],
+                    'payable'   =>  getAmount($charges['payable'],2).' ' .$charges['receiver_currency'],
+                    'charges'   => getAmount( $charges['total_charge'], 2).' ' .$charges['receiver_currency'],
+                    'will_get'  => getAmount( $charges['request_amount'], 2).' ' .$charges['sender_currency'],
+                    'status'  => "Pending",
+                ];
+                $sender_wallet->user->notify(new SenderMail( $sender_wallet->user,(object)$notifyDataSender));
+    
+                //Receiver notifications
+                $notifyDataReceiver = [
+                    'trx_id'  => $trx_id,
+                    'title'  => "Request Money From @" . @$sender_wallet->user->username." (".@$sender_wallet->user->email.")",
+                    'request_amount'  => getAmount($charges['request_amount'],2).' '.$charges['sender_currency'],
+                    'payable'   =>  getAmount($charges['payable'],2).' ' .$charges['receiver_currency'],
+                    'charges'   => getAmount( $charges['total_charge'], 2).' ' .$charges['receiver_currency'],
+                    'will_get'  => getAmount( $charges['request_amount'], 2).' ' .$charges['sender_currency'],
+                    'status'  => "Pending",
+                ];
+                   //Receiver notifications
+                $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
+            }
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
 
                 //sender notifications
                 $message = __("Request Money" . " "  . get_amount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", to " . $receiver->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
@@ -219,7 +245,7 @@ class RequestMoneyController extends Controller
 
                 //receiver notifications
                 $message = __("Request Money" . " "  . get_amount($charges['request_amount']) . ' ' . $charges['sender_currency'] .  ", From " . @$sender_wallet->user->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d') . ' request sent to admin.');
-               sendApiSMS($message,@$receiver->full_mobile);
+                sendApiSMS($message,@$receiver->full_mobile);
                 
             }
 

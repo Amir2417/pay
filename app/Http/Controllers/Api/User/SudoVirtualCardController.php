@@ -518,22 +518,28 @@ class SudoVirtualCardController extends Controller
 
             $trx_id =  'CB'.getTrxNum();
 
-            $notifyDataSender = [
-              'trx_id'  => $trx_id,
-              'title'  => "Virtual Card (Buy Card)",
-              'request_amount'  => getAmount($amount,4).' '.get_default_currency_code(),
-              'payable'   =>  getAmount($payable,4).' ' .get_default_currency_code(),
-              'charges'   => getAmount( $total_charge, 2).' ' .get_default_currency_code(),
-              'card_amount'  => getAmount( $v_card->amount, 2).' ' .get_default_currency_code(),
-              'card_pan'  => $v_card->maskedPan,
-              'status'  => "Success",
-            ];
+            
             try{
                 $sender = $this->insertCadrBuy( $trx_id,$user,$wallet,$amount, $v_card ,$payable);
                 $this->insertBuyCardCharge( $fixedCharge,$percent_charge, $total_charge,$user,$sender,$v_card->maskedPan);
-                if( $basic_setting->sms_notification == true){
+                $notifyDataSender = [
+                    'trx_id'  => $trx_id,
+                    'title'  => "Virtual Card (Buy Card)",
+                    'request_amount'  => getAmount($amount,2).' '.get_default_currency_code(),
+                    'payable'   =>  getAmount($payable,2).' ' .get_default_currency_code(),
+                    'charges'   => getAmount( $total_charge, 2).' ' .get_default_currency_code(),
+                    'card_amount'  => getAmount( $v_card->amount, 2).' ' .get_default_currency_code(),
+                    'card_pan'  => $v_card->maskedPan,
+                    'status'  => "Success",
+                  ];
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    $user->notify(new CreateMail($user,(object)$notifyDataSender));
+                }
+                
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Virtual Card (Buy Card)" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                   sendApiSMS($message,@$user->full_mobile);
+                    sendApiSMS($message,@$user->full_mobile);
                 }
                 $message =  ['success'=>[__('Virtual Card Buy Successfully')]];
                 return Helpers::onlysuccess($message);
@@ -690,10 +696,25 @@ class SudoVirtualCardController extends Controller
             $trx_id = 'CF'.getTrxNum();
             $sender = $this->insertCardFund( $trx_id,$user,$wallet,$amount, $myCard ,$payable);
             $this->insertFundCardCharge( $fixedCharge,$percent_charge, $total_charge,$user,$sender,$myCard->maskedPan,$amount);
-            if($basic_setting->sms_notification == true){
+
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyDataSender = [
+                    'trx_id'  => $trx_id,
+                    'title'  => "Virtual Card (Fund Amount)",
+                    'request_amount'  => getAmount($amount,2).' '.get_default_currency_code(),
+                    'payable'   =>  getAmount($payable,2).' ' .get_default_currency_code(),
+                    'charges'   => getAmount( $total_charge,2).' ' .get_default_currency_code(),
+                    'card_amount'  => getAmount($myCard->amount,2).' ' .get_default_currency_code(),
+                    'card_pan'  =>    $myCard->maskedPan,
+                    'status'  => "Success",
+                  ];
+                $user->notify(new Fund($user,(object)$notifyDataSender));
+            }
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                 
                 $message = __("Virtual Card (Fund Amount)" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-               sendApiSMS($message,@$user->full_mobile);
+                sendApiSMS($message,@$user->full_mobile);
             }
             $message =  ['success'=>[__('Card Funded Successfully')]];
             return Helpers::onlysuccess($message);

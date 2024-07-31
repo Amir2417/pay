@@ -58,9 +58,9 @@ class BillPayMail extends Notification
                     ->subject("Bill Pay For ". $data->bill_type.' ('.$data->bill_number.' )')
                     ->line("Your Bill pay request sent to admin successfully  for ".$data->bill_type." , details of bill pay:")
                     ->line("Transaction Id: " .$trx_id)
-                    ->line("Request Amount: " . getAmount($data->request_amount,4).' '.get_default_currency_code())
-                    ->line("Fees & Charges: " . getAmount($data->charges,4).' '.get_default_currency_code())
-                    ->line("Total Payable Amount: " . get_amount($data->payable,get_default_currency_code(),'4'))
+                    ->line("Request Amount: " . getAmount($data->request_amount,2).' '.get_default_currency_code())
+                    ->line("Fees & Charges: " . getAmount($data->charges,2).' '.get_default_currency_code())
+                    ->line("Total Payable Amount: " . get_amount($data->payable,get_default_currency_code(),'2'))
                     ->line("Status: ". $data->status)
                     ->line("Date And Time: " .$dateTime)
                     ->line('Thank you for using our application!');

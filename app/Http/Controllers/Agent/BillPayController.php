@@ -69,7 +69,21 @@ class BillPayController extends Controller
             $trx_id = 'BP'.getTrxNum();
             $sender = $this->insertSender($trx_id,$sender_wallet, $charges, $bill_type,$validated['bill_number']);
             $this->insertSenderCharges($sender,$charges,$sender_wallet);
-            if( $this->basic_settings->agent_sms_notification == true){
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyData = [
+                    'trx_id'  => $trx_id,
+                    'bill_type'  => @$bill_type->name,
+                    'bill_number'  => @$validated['bill_number'],
+                    'request_amount'   => $charges['sender_amount'],
+                    'charges'   => $charges['total_charge'],
+                    'current_balance'  => get_amount($sender_wallet->balance),
+                    'status'  => "Pending",
+                ];
+                //send notifications
+                $user->notify(new BillPayMail($user,(object)$notifyData));
+            }
+            if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Bill Pay" . " "  . get_amount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                 sendApiSMS($message,@$user->full_mobile);
             }

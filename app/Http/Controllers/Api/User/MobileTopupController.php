@@ -147,9 +147,23 @@ class MobileTopupController extends Controller
             $sender = $this->insertSender( $trx_id,$user,$userWallet,$amount, $topup_type, $mobile_number,$payable);
             $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $amount,$user,$sender);
             //send notifications
-            if( $basic_setting->sms_notification == true){
-                $message = __("Mobile Topup" . " "  . getAmount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-               sendApiSMS($message,@$user->full_mobile);
+            $auth_user  = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyData = [
+                    'trx_id'  => $trx_id,
+                    'topup_type'  => @$topup_type->name,
+                    'mobile_number'  => $mobile_number,
+                    'request_amount'   => $amount,
+                    'charges'   => $total_charge,
+                    'payable'  => $payable,
+                    'current_balance'  => getAmount($userWallet->balance, 2),
+                    'status'  => "Pending",
+                  ];
+                $user->notify(new TopupMail($user,(object)$notifyData));
+            }
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
+                $message = __("Mobile Topup" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                sendApiSMS($message,@$user->full_mobile);
             }
             $message =  ['success'=>[__('Mobile topup request send to admin successful')]];
             return Helpers::onlysuccess($message);

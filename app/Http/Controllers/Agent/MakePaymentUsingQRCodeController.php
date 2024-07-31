@@ -31,7 +31,7 @@ class MakePaymentUsingQRCodeController extends Controller
         $page_title             = "Make Payment Using QRCode";
         $data                   = QrCodes::with(['merchant'])
                                     ->where('slug',$request->slug)
-                                    ->where('receiver_type',GlobalConst::RECEIVER_TYPE_AGENT)
+                                    ->where('receiver_type',GlobalConst::SENDER_TYPE_AGENT)
                                     ->first();
 
         if(!$data) return redirect()->route('agent.qrcode.index')->with(['error' => ['Sorry! Data not found.']]);
@@ -57,7 +57,7 @@ class MakePaymentUsingQRCodeController extends Controller
      */
     public function confirm(Request $request,$slug){
         $data       = QrCodes::with(['merchant'])->where('slug',$slug)
-                        ->where('receiver_type',GlobalConst::RECEIVER_TYPE_AGENT)
+                        ->where('receiver_type',GlobalConst::SENDER_TYPE_AGENT)
                         ->first();
                         
         if(!$data) return back()->with(['error' => ['Sorry! Data not found']]);
@@ -125,6 +125,7 @@ class MakePaymentUsingQRCodeController extends Controller
             'recipient_amount' => $amount,
             'receiver' => $receiver,
         ];
+        $auth_user = auth()->user();
         DB::beginTransaction();
         try{
             $id     = DB::table('transactions')->insertGetId([
@@ -143,7 +144,7 @@ class MakePaymentUsingQRCodeController extends Controller
                 'created_at'                    => now(),
             ]);
             $this->updateUserWalletBalance($agent_wallet,$available_balance);
-            if($basic_settings->agent_sms_notification == true){
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Make Payment" . " "  . get_amount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                 sendApiSMS($message,@$user->full_mobile);
             }
@@ -219,7 +220,7 @@ class MakePaymentUsingQRCodeController extends Controller
             'sender_amount' => $amount,
             'sender' => auth()->user(),
         ]; 
-
+        $auth_user   = auth()->user(); 
         DB::beginTransaction();
         try{
             $id     = DB::table('transactions')->insertGetId([
@@ -238,7 +239,7 @@ class MakePaymentUsingQRCodeController extends Controller
                 'created_at'                    => now(),
             ]);
             $this->updateMerchantWalletBalance($receiver_wallet,$available_balance);
-            if($basic_settings->agent_sms_notification == true){
+            if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Money received" . " "  . get_amount($amount) . ' ' . get_default_currency_code() . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                sendApiSMS($message,@$receiver->full_mobile);
             }

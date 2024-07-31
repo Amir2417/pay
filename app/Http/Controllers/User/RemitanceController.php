@@ -142,10 +142,29 @@ class RemitanceController extends Controller
                     $this->insertSenderCharges( $fixedCharge,$percent_charge, $total_charge, $send_amount,$user,$sender,$receipient);
                     session()->forget('remittance_token');
                 }
-                if( $basic_setting->sms_notification == true){
-                    //send notifications
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    $notifyData = [
+                        'trx_id'  => $trx_id,
+                        'title'  => "Send Remittance to @" . $receipient->firstname.' '.@$receipient->lastname." (".@$receipient->mobile_code.@$receipient->mobile.")",
+                        'request_amount'  => getAmount($send_amount,2).' '.get_default_currency_code(),
+                        'exchange_rate'  => "1 " .get_default_currency_code().' = '.get_amount($to_country->rate,$to_country->code),
+                        'charges'   => getAmount( $total_charge, 2).' ' .get_default_currency_code(),
+                        'payable'   =>  getAmount($payable,2).' ' .get_default_currency_code(),
+                        'sending_country'   => @$form_country,
+                        'receiving_country'   => @$to_country->country,
+                        'receiver_name'  =>  @$receipient->firstname.' '.@$receipient->lastname,
+                        'alias'  =>  ucwords(str_replace('-', ' ', @$receipient->alias)),
+                        'transaction_type'  =>  @$transaction_type,
+                        'receiver_get'   =>  getAmount($receiver_will_get,2).' ' .$to_country->code,
+                        'status'  => "Pending",
+                    ];
+                    //sender notifications
+                    $user->notify(new BankTransferMail($user,(object)$notifyData));
+                }
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Send Remittance" . " "  . get_amount($send_amount) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
-                   sendApiSMS($message,@$user->full_mobile);
+                    sendApiSMS($message,@$user->full_mobile);
                 }
             }
             Session::flash('success', [__('Remittance Money send successfully')]);

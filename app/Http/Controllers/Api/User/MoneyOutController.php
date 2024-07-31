@@ -287,9 +287,13 @@ class MoneyOutController extends Controller
                 $this->insertChargesManual($moneyOutData,$inserted_id);
                 $this->insertDeviceManual($moneyOutData,$inserted_id);
                 $track->delete();
-                if( $basic_setting->sms_notification == true){
-                    $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                   sendApiSMS($message,@$user->full_mobile);
+                $auth_user  = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    $user->notify(new WithdrawMail($user,$moneyOutData));
+                }
+                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
+                    $message = __("Withdraw money" . " "  . get_amount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                    sendApiSMS($message,@$user->full_mobile);
                 }
                 $message =  ['success'=>[__('Withdraw money request send to admin successful')]];
                 return Helpers::onlysuccess($message);
@@ -545,9 +549,13 @@ class MoneyOutController extends Controller
                     $this->insertDeviceManual($moneyOutData,$inserted_id);
                     $track->delete();
                     //send notifications
-                    if( $basic_setting->sms_notification == true){
-                        $message = __("Withdraw money" . " "  . getAmount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
-                       sendApiSMS($message,@$user->full_mobile);
+                    $auth_user  = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $user->notify(new WithdrawMail($user,$moneyOutData));
+                    }
+                    if($auth_user->email_verified == false && $auth_user->sms_verified == true){
+                        $message = __("Withdraw money" . " "  . get_amount($moneyOutData->amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
+                        sendApiSMS($message,@$user->full_mobile);
                     }
                     $message =  ['success'=>[__('Withdraw money request send successful')]];
                     return Helpers::onlysuccess($message);
