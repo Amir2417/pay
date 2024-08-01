@@ -584,7 +584,22 @@ class RemittanceController extends Controller
             return Helpers::error($error);
          }
          $trx_id = $this->trx_id;
-        
+         $notifyData = [
+            'trx_id'  => $trx_id??'ndf',
+            'title'  => "Send Remittance to @" . $receiver_recipient->fullname." (".@$receipient->email.")",
+            'request_amount'  => getAmount($charges->sender_amount,2).' '.$charges->sender_cur_code,
+            'exchange_rate'  => "1 " .get_default_currency_code().' = '.get_amount($charges->exchange_rate,$charges->receiver_cur_code,2),
+            'charges'   => getAmount( $charges->total_charge,2).' ' .$charges->sender_cur_code,
+            'payable'   =>  getAmount($charges->payable,2).' ' .$charges->sender_cur_code,
+            'sending_country'   => @$form_country,
+            'receiving_country'   => @$to_country->country,
+            'sender_recipient_name'  =>  @$receipient->fullname,
+            'receiver_recipient_name'  =>  @$receiver_recipient->fullname,
+            'alias'  =>  ucwords(str_replace('-', ' ', @$receipient->alias)),
+            'transaction_type'  =>  @$transaction_type,
+            'receiver_get'   =>  getAmount($charges->will_get,2).' ' .$charges->receiver_cur_code,
+            'status'  => "Pending",
+          ];
         try{
             if($transaction_type === Str::slug(GlobalConst::TRX_WALLET_TO_WALLET_TRANSFER)){
                 $receiver_user =  json_decode($receiver_recipient->details);
@@ -599,7 +614,11 @@ class RemittanceController extends Controller
                 $sender = $this->insertSender( $trx_id,$userWallet,$receipient,$form_country,$to_country,$transaction_type, $receiver_recipient,$charges);
                 if($sender){
                     $this->insertSenderCharges( $sender,$charges,$user,$receiver_recipient);
-                    if( $basic_setting->agent_sms_notification == true){
+                    $auth_user = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $user->notify(new SenderEmail($user,(object)$notifyData));
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Send Remittance" . " "  . get_amount($charges->sender_amount) . ' ' . $charges->sender_cur_code .  ", to " . @$receiver_recipient->fullname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                         
                        sendApiSMS($message,@$user->full_mobile);
@@ -615,7 +634,11 @@ class RemittanceController extends Controller
                 $sender = $this->insertSender($trx_id,$userWallet,$receipient,$form_country,$to_country,$transaction_type, $receiver_recipient,$charges);
                 if($sender){
                     $this->insertSenderCharges($sender,$charges,$user,$receiver_recipient);
-                    if( $basic_setting->agent_sms_notification == true){
+                    $auth_user = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $user->notify(new SenderEmail($user,(object)$notifyData));
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Send Remittance" . " "  . get_amount($charges->sender_amount) . ' ' . get_default_currency_code() .  ", to " . $receipient->firstname.' '.@$receipient->lastname . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
                         
                        sendApiSMS($message,@$user->full_mobile);

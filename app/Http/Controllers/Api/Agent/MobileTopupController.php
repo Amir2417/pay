@@ -128,9 +128,21 @@ class MobileTopupController extends Controller
             $trx_id = 'MP'.getTrxNum();
             $sender = $this->insertSender($trx_id,$sender_wallet, $charges,$topup_type,$phone);
             $this->insertSenderCharges($sender,$charges,$sender_wallet);
-            if( $basic_setting->agent_sms_notification == true){
-                //send notifications
-                
+            $auth_user = auth()->user();
+            if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                $notifyData = [
+                    'trx_id'  => $trx_id,
+                    'topup_type'  => @$topup_type->name,
+                    'mobile_number'  => $phone,
+                    'request_amount'   => $charges['sender_amount'],
+                    'charges'   => $charges['total_charge'],
+                    'payable'  => $charges['payable'],
+                    'current_balance'  => getAmount($sender_wallet->balance,2),
+                    'status'  => "Pending",
+                ];
+                $user->notify(new TopupMail($user,(object)$notifyData));
+            }
+            if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                 $message = __("Mobile Topup" . " "  . get_amount($charges['sender_amount']) . ' ' . get_default_currency_code() .  " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d')) . ' request sent.';
                sendApiSMS($message,@$sender_wallet->agent->full_mobile);
                 

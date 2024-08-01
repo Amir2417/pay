@@ -77,7 +77,8 @@ class BillPayController extends Controller
                     'bill_number'  => @$validated['bill_number'],
                     'request_amount'   => $charges['sender_amount'],
                     'charges'   => $charges['total_charge'],
-                    'current_balance'  => get_amount($sender_wallet->balance),
+                    'payable'  => $charges['payable'],
+                    'current_balance'  => getAmount($sender_wallet->balance, 2),
                     'status'  => "Pending",
                 ];
                 //send notifications

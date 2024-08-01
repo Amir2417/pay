@@ -74,7 +74,7 @@ class MobileTopupController extends Controller
                     'request_amount'   => $charges['sender_amount'],
                     'charges'   => $charges['total_charge'],
                     'payable'  => $charges['payable'],
-                    'current_balance'  => get_amount($sender_wallet->balance, 4),
+                    'current_balance'  => getAmount($sender_wallet->balance, 2),
                     'status'  => "Pending",
                 ];
                 $user->notify(new TopupMail($user,(object)$notifyData));

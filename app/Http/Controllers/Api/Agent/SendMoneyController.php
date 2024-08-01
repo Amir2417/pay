@@ -224,8 +224,21 @@ class SendMoneyController extends Controller
             if($sender){
                  $this->insertSenderCharges($sender,$charges,$sender_wallet,$receiver_wallet);
                  try{
-                    if( $basic_setting->agent_sms_notification == true){
-                        
+                    $auth_user = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $notifyDataSender = [
+                            'trx_id'  => $trx_id,
+                            'title'  => "Send Money to @" . @$receiver_wallet->agent->username." (".@$receiver_wallet->agent->email.")",
+                            'request_amount'  => getAmount($charges['sender_amount'],2).' '.$charges['sender_currency'],
+                            'payable'   =>  getAmount($charges['payable'],2).' ' .$charges['sender_currency'],
+                            'charges'   => getAmount( $charges['total_charge'], 2).' ' .$charges['sender_currency'],
+                            'received_amount'  => getAmount($charges['receiver_amount'], 2).' ' .$charges['receiver_currency'],
+                            'status'  => "Success",
+                        ];
+                        //sender notifications
+                        $sender_wallet->agent->notify(new SenderMail($sender_wallet->agent,(object)$notifyDataSender));
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){  
                         $message = __("Send Money" . " "  . get_amount($charges['sender_amount']) . ' ' . $charges['sender_currency'] .  ", to " . @$receiver_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d').' request sent to admin.');
                        sendApiSMS($message,@$sender_wallet->agent->full_mobile);
                         
@@ -241,7 +254,8 @@ class SendMoneyController extends Controller
                  //Receiver notifications
                  try{
                     //Receiver notifications
-                   if( $basic_setting->agent_sms_notification == true){
+                    $auth_user = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
                        $notifyDataReceiver = [
                            'trx_id'  => $trx_id,
                            'title'  => "Received Money from @" .@$sender_wallet->agent->username." (".@$sender_wallet->agent->email.")",
@@ -250,7 +264,12 @@ class SendMoneyController extends Controller
                        ];
                        //send notifications
                        $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
-                   }
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){  
+                        $message = __("Received Money" . " "  . get_amount($charges['receiver_amount']) . ' ' . $charges['receiver_currency'] .  ", from " . @$sender_wallet->agent->username . " " . "Transaction ID: " . $trx_id . ' ' . "Date : " . Carbon::now()->format('Y-m-d'));
+                       sendApiSMS($message,@$receiver_wallet->agent->full_mobile);
+                        
+                    }
                 }catch(Exception $e){
                    //Error Handler
                 }

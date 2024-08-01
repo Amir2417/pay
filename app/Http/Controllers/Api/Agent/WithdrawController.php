@@ -257,7 +257,11 @@ class WithdrawController extends Controller
                 $this->insertChargesManual($withdrawData,$inserted_id);
                 $this->insertDeviceManual($withdrawData,$inserted_id);
                 $track->delete();
-                if( $basic_setting->agent_sms_notification == true){
+                $auth_user = auth()->user();
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                    $agent->notify(new WithdrawMail($agent,$withdrawData));
+                }
+                if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                     $message = __("Withdraw money" . " "  . get_amount($withdrawData->charges->requested_amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                    sendApiSMS($message,@$user->full_mobile);
                 }
@@ -507,7 +511,11 @@ class WithdrawController extends Controller
                     $this->insertDeviceManual($withdrawdata,$inserted_id);
                     $track->delete();
                     //send notifications
-                    if( $basic_setting->agent_sms_notification == true){
+                    $auth_user = auth()->user();
+                    if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                        $user->notify(new WithdrawMail($user,$withdrawdata));
+                    }
+                    if( $auth_user->email_verified == false && $auth_user->sms_verified == true){
                         $message = __("Withdraw money" . " "  . get_amount($withdrawdata->charges->requested_amount) . ' ' . get_default_currency_code() . " "  . ",Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                        sendApiSMS($message,@$user->full_mobile);
                     }
