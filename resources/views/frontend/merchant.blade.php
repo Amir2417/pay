@@ -1,5 +1,49 @@
 @extends('frontend.layouts.master')
 
+@push('css')
+    <style>
+        ::selection{
+            background: #0073f5;
+        }
+        .banner-section .banner-sub-titel {
+            color: #0073f5;
+            background: rgba(0, 115, 245, 0.2);
+        }
+        .banner-section .banner-sub-titel i {
+            color: #0073f5;
+        }
+        .banner-content .btn--base {
+            background: #0073f5;
+        }
+        .banner-content .btn--base:hover {
+            box-shadow: 0 10px 20px rgba(0, 115, 245, 0.4);
+        }
+        .btn--base.active {
+            background: #ffffff;
+            color: #0073f5;
+            box-shadow: 0px 10px 15px 0px rgba(158, 154, 221, 0.1);
+        }
+        .btn--base.active:hover {
+            background: #0073f5;
+            color: #ffffff;
+            border-color: #0073f5;
+            box-shadow: 0 10px 20px rgba(0, 115, 245, 0.4);
+        }
+        .section-header .section-sub-titel {
+            color: #0073f5;
+            background: rgba(0, 115, 245, 0.2);
+        }
+        .section-header .section-sub-titel i {
+            color: #0073f5;
+        }
+        .service-icon {
+            color: #0073f5;
+        }
+        .service-item {
+            border-color: #0073f5;
+        }
+    </style>
+@endpush
 @php
     $lang = selectedLang();
     $merchant_slug = Illuminate\Support\Str::slug(App\Constants\SiteSectionConst::MERCHANT_SECTION);
