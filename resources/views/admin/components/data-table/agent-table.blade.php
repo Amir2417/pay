@@ -18,8 +18,16 @@
                     </ul>
                 </td>
                 <td><span>{{ $item->username }}</span></td>
-                <td>{{ $item->email }}</td>
-                <td>{{ $item->full_mobile }}</td>
+                @if ($item->email == '' || $item->email == null)
+                    <td>N/A</td>
+                @else
+                <td>{{ $item->email }} <span class="{{ $item->emailStatus->class }}">{{ __($item->emailStatus->value) }}</span></td>
+                @endif
+                @if ($item->full_mobile == '' || $item->full_mobile == null)
+                    <td>N/A</td>
+                @else
+                    <td>{{ @$item->full_mobile }} <span class="{{ $item->emailStatus->class }}">{{ __($item->emailStatus->value) }}</span></td>
+                @endif
                 <td>
                     @if (Route::currentRouteName() == "admin.agents.kyc.unverified")
                         <span class="{{ $item->kycStringStatus->class }}">{{ __($item->kycStringStatus->value ) }}</span>

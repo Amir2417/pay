@@ -212,9 +212,15 @@ class MerchantCareController extends Controller
         if($user->kyc == null) return back()->with(['error' => ['Merchant KYC information not found']]);
 
         try{
-            if( $basic_setting->email_notification == true){
+            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false)){
                 $user->notify(new Approved($user));
-                }
+            }
+            $date = Carbon::now();
+            $dateTime = $date->format('Y-m-d h:i:s A');
+            if( $user->email_verified == false && $user->sms_verified == true){
+                $message = __("Hello " .$user->fullname. ", Your KYC verification request is approved by admin." . "Approved At: " .$dateTime . 'Thank you for using our application!');
+                sendApiSMS($message,@$user->full_mobile);
+            }
             $user->update([
                 'kyc_verified'  => GlobalConst::APPROVED,
             ]);
@@ -238,8 +244,14 @@ class MerchantCareController extends Controller
         if($user->kyc == null) return back()->with(['error' => [__("Merchant KYC information not found")]]);
 
         try{
-            if( $basic_setting->email_notification == true){
+            $date = Carbon::now();
+            $dateTime = $date->format('Y-m-d h:i:s A');
+            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false)){
                 $user->notify(new Rejected($user,$request->reason));
+            }
+            if( $user->email_verified == false && $user->sms_verified == true){
+                $message = __("Hello " .$user->fullname. ", Your KYC verification request is rejected by admin." . "Rejection Reason: ". $request->reason . "Rejected At: " .$dateTime . 'Thank you for using our application!');
+                sendApiSMS($message,@$user->full_mobile);
             }
             $user->update([
                 'kyc_verified'  => GlobalConst::REJECTED,

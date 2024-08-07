@@ -194,5 +194,24 @@ class Agent extends Authenticatable
     public function modelGuardName() {
         return "agent";
     }
+    public function getEmailStatusAttribute() {
+        $status = $this->sms_verified;
+        $data = [
+            'class' => "",
+            'value' => "",
+        ];
+        if($status == GlobalConst::VERIFIED) {
+            $data = [
+                'class'     => "badge badge--success",
+                'value'     => "Verified",
+            ];
+        }else if($status == GlobalConst::UNVERIFIED) {
+            $data = [
+                'class'     => "badge badge--danger",
+                'value'     => "Unverified",
+            ];
+        }
+        return (object) $data;
+    }
 
 }

@@ -56,7 +56,7 @@ class Rejected extends Notification
                     ->subject("KYC Verification")
                     ->line("Your KYC verification request is rejected by admin")
                     ->line("Rejection Reason: ". $this->reason)
-                    ->line("Approved At: " .$dateTime)
+                    ->line("Rejected At: " .$dateTime)
                     ->line('Thank you for using our application!');
     }
 
