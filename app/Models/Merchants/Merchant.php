@@ -119,6 +119,25 @@ class Merchant extends Authenticatable
         return $this->hasMany(SandboxWallet::class,'merchant_id','id');
     }
     public function getEmailStatusAttribute() {
+        $status = $this->email_verified;
+        $data = [
+            'class' => "",
+            'value' => "",
+        ];
+        if($status == GlobalConst::VERIFIED) {
+            $data = [
+                'class'     => "badge badge--success",
+                'value'     => "Verified",
+            ];
+        }else if($status == GlobalConst::UNVERIFIED) {
+            $data = [
+                'class'     => "badge badge--danger",
+                'value'     => "Unverified",
+            ];
+        }
+        return (object) $data;
+    }
+    public function getSmsStatusAttribute() {
         $status = $this->sms_verified;
         $data = [
             'class' => "",

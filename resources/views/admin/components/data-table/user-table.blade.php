@@ -26,7 +26,7 @@
                 @if ($item->full_mobile == '' || $item->full_mobile == null)
                     <td>N/A</td>
                 @else
-                    <td>{{ @$item->full_mobile }} <span class="{{ $item->emailStatus->class }}">{{ __($item->emailStatus->value) }}</span></td>
+                    <td>{{ @$item->full_mobile }} <span class="{{ $item->smsStatus->class }}">{{ __($item->smsStatus->value) }}</span></td>
                 @endif
                 
                 <td>

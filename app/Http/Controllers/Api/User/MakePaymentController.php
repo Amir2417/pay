@@ -148,7 +148,7 @@ class MakePaymentController extends Controller
             $error = ['error'=>[__('Merchant not found')]];
             return Helpers::error($error);
         }
-        if( $user->email == auth()->user()->email){
+        if( $user->username == auth()->user()->username){
             $error = ['error'=>[__("Can't transfer/request to your own")]];
             return Helpers::error($error);
         }
@@ -231,7 +231,7 @@ class MakePaymentController extends Controller
             }
             try{
                 $auth_user  = auth()->user();
-                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)  || ($auth_user->sms_verified == true && $auth_user->email != null) || ($auth_user->sms_verified == true && $auth_user->email != '')){
                     $notifyDataSender = [
                         'trx_id'  => $trx_id,
                         'title'  => "Make Payment to @" . @$receiver->username." (".@$receiver->email.")",

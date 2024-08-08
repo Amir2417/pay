@@ -62,7 +62,7 @@
 
                                     <label>{{ __("Amount") }}<span>*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form--control" placeholder="{{ __("enter Amount") }}" required name="amount" value="{{ old("amount") }}">
+                                        <input type="text" class="form--control number-input" placeholder="{{ __("enter Amount") }}" required name="amount" value="{{ old("amount") }}">
                                         <select class="form--control nice-select">
                                             <option value="{{ get_default_currency_code() }}">{{ get_default_currency_code() }}</option>
                                         </select>
@@ -177,6 +177,16 @@
 
 @push('script')
     <script>
+        document.querySelector('.number-input').addEventListener('input', function (e) {
+            let value = e.target.value;
+            
+            // Use a regular expression to match the input value
+            if (!/^\d*\.?\d{0,2}$/.test(value)) {
+                e.target.value = value.slice(0, -1);
+            }
+        });
+    </script>
+    <script>
          var defualCurrency = "{{ get_default_currency_code() }}";
          var defualCurrencyRate = "{{ get_default_currency_rate() }}";
          var presion = 4;
@@ -272,7 +282,7 @@
                 var fixed_charge_calc = parseFloat(fixed_charge);
                 var percent_charge_calc = parseFloat(sender_currency_rate)*(parseFloat(sender_amount) / 100) * parseFloat(percent_charge);
                 var total_charge = parseFloat(fixed_charge_calc) + parseFloat(percent_charge_calc);
-                total_charge = parseFloat(total_charge).toFixed(presion);
+                total_charge = parseFloat(total_charge).toFixed(2);
                 // return total_charge;
                 return {
                     total: total_charge,

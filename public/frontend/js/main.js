@@ -878,3 +878,5 @@ function switcherAjax(hitUrl,method = "PUT") {
     });
   });
 }
+
+

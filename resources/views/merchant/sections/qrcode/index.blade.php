@@ -49,7 +49,7 @@
                                     <div class="col-xl-6 col-lg-6 form-group">
                                         <label>{{ __("Amount") }}</label>
                                         <div class="input-group">
-                                            <input type="text" name="amount" class="form--control" placeholder="Enter Amount...">
+                                            <input type="text" name="amount" class="form--control number-input" placeholder="Enter Amount...">
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 form-group">
@@ -105,4 +105,16 @@
 
 
 @endsection
+@push('script')
+    <script>
+        document.querySelector('.number-input').addEventListener('input', function (e) {
+            let value = e.target.value;
+            
+            // Use a regular expression to match the input value
+            if (!/^\d*\.?\d{0,2}$/.test(value)) {
+                e.target.value = value.slice(0, -1);
+            }
+        });
+    </script>
+@endpush
 

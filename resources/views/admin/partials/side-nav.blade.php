@@ -398,7 +398,7 @@
                                     ],
                                     [
                                         'title'     => "Email unverified",
-                                        'route'     => "admin.users.email.unverified",
+                                        'route'     => "admin.merchants.email.unverified",
                                     ],
 
                                     [

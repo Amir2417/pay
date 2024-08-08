@@ -109,7 +109,7 @@ class MakePaymentController extends Controller
             //Sender notifications
             try{
                 $auth_user  = auth()->user();
-                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)  || ($auth_user->sms_verified == true && $auth_user->email != null) || ($auth_user->sms_verified == true && $auth_user->email != '')){
                     $notifyDataSender = [
                         'trx_id'  => $trx_id,
                         'title'  => "Make Payment to @" . @$receiver->username." (".@$receiver->email.")",

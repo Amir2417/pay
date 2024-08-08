@@ -61,7 +61,7 @@
 
                                     <label>{{ __("Amount") }}<span>*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form--control" required placeholder="{{__('enter Amount')}}" name="amount" value="{{ old("amount") }}">
+                                        <input type="text" class="form--control number-input" required placeholder="{{__('enter Amount')}}" name="amount" value="{{ old("amount") }}">
                                         <select class="form--control nice-select">
                                             <option value="{{ get_default_currency_code() }}">{{ get_default_currency_code() }}</option>
                                         </select>
@@ -176,7 +176,7 @@
     </div>
     <div class="dashboard-list-area mt-20">
         <div class="dashboard-header-wrapper">
-            <h4 class="title ">{{__("withdraw Log")}}</h4>
+            <h2 class="title ">{{__("withdraw Log")}}</h2>
             <div class="dashboard-btn-wrapper">
                 <div class="dashboard-btn mb-2">
                     <a href="{{ setRoute('merchant.transactions.index','withdraw') }}" class="btn--base">{{__("View More")}}</a>
@@ -191,6 +191,15 @@
 @endsection
 
 @push('script')
+<script>
+    document.querySelector('.number-input').addEventListener('input', function (e) {
+        let value = e.target.value;
+        
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            e.target.value = value.slice(0, -1);
+        }
+    });
+</script>
     <script>
          var defualCurrency = "{{ get_default_currency_code() }}";
          var defualCurrencyRate = "{{ get_default_currency_rate() }}";
@@ -217,7 +226,7 @@
             var currencyRate = acceptVar().currencyRate;
             var currencyMinAmount = acceptVar().currencyMinAmount;
             var currencyMaxAmount = acceptVar().currencyMaxAmount;
-            $('.rate-show').html("1 " + defualCurrency + " = " + parseFloat(currencyRate).toFixed(4) + " " + currencyCode);
+            $('.rate-show').html("1 " + defualCurrency + " = " + parseFloat(currencyRate).toFixed(2) + " " + currencyCode);
         }
         function getLimit() {
             var sender_currency = acceptVar().currencyCode;
@@ -225,8 +234,8 @@
             var min_limit = acceptVar().currencyMinAmount;
             var max_limit =acceptVar().currencyMaxAmount;
             if($.isNumeric(min_limit) || $.isNumeric(max_limit)) {
-                var min_limit_calc = parseFloat(min_limit/sender_currency_rate).toFixed(4);
-                var max_limit_clac = parseFloat(max_limit/sender_currency_rate).toFixed(4);
+                var min_limit_calc = parseFloat(min_limit/sender_currency_rate).toFixed(2);
+                var max_limit_clac = parseFloat(max_limit/sender_currency_rate).toFixed(2);
                 $('.limit-show').html("{{ __('limit') }} " + min_limit_calc + " " + defualCurrency + " - " + max_limit_clac + " " + defualCurrency);
                 return {
                     minLimit:min_limit_calc,
@@ -278,7 +287,7 @@
                 var fixed_charge_calc = parseFloat(fixed_charge);
                 var percent_charge_calc = (parseFloat(conversion_amount) / 100) * parseFloat(percent_charge);
                 var total_charge = parseFloat(fixed_charge_calc) + parseFloat(percent_charge_calc);
-                total_charge = parseFloat(total_charge).toFixed(4);
+                total_charge = parseFloat(total_charge).toFixed(2);
                 // return total_charge;
                 return {
                     total: total_charge,
@@ -298,7 +307,7 @@
             if (charges == false) {
                 return false;
             }
-            $(".fees-show").html("{{ __('charge') }}: " + parseFloat(charges.fixed).toFixed(4) + " " + sender_currency + " + " + parseFloat(charges.percent).toFixed(4) + "%");
+            $(".fees-show").html("{{ __('charge') }}: " + parseFloat(charges.fixed).toFixed(2) + " " + sender_currency + " + " + parseFloat(charges.percent).toFixed(2) + "%");
         }
         function activeItems(){
             var selectedVal = acceptVar().selectedVal.val();
@@ -330,7 +339,7 @@
                 $('.fees').text(total_charge + " " + sender_currency);
 
                 var conversionAmount = senderAmount * sender_currency_rate;
-                $('.conversionAmount').text(parseFloat(conversionAmount).toFixed(4) + " " + sender_currency);
+                $('.conversionAmount').text(parseFloat(conversionAmount).toFixed(2) + " " + sender_currency);
                 // willget
                 var will_get = parseFloat(senderAmount) * parseFloat(sender_currency_rate)
                 var will_get_total = 0;
@@ -339,7 +348,7 @@
                 }else{
                      will_get_total =  parseFloat(will_get) - parseFloat(charges.total);
                 }
-                $('.will-get').text(parseFloat(will_get_total).toFixed(4) + " " + sender_currency);
+                $('.will-get').text(parseFloat(will_get_total).toFixed(2) + " " + sender_currency);
 
                 // total payable
                 var totalPay = parseFloat(senderAmount)
@@ -349,7 +358,7 @@
                 }else{
                      pay_in_total =  parseFloat(totalPay);
                 }
-                $('.total-pay').text(parseFloat(pay_in_total).toFixed(4) + " " + defualCurrency);
+                $('.total-pay').text(parseFloat(pay_in_total).toFixed(2) + " " + defualCurrency);
 
         }
 

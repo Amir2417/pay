@@ -57,7 +57,7 @@
                                 <div class="col-xxl-12 col-xl-12 col-lg-12  form-group">
                                     <label>{{ __("Amount") }}<span>*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form--control number-input" required placeholder="{{__('enter Amount')}}" name="amount" value="{{ old("amount") }}">
+                                        <input type="text" class="form--control number-input float-validate" required placeholder="{{__('enter Amount')}}" name="amount" value="{{ old("amount") }}">
                                         <select class="form--control nice-select currency" name="currency">
                                             <option value="{{ get_default_currency_code() }}">{{ get_default_currency_code() }}</option>
                                         </select>
@@ -200,6 +200,16 @@
 @endsection
 
 @push('script')
+<script>
+    document.querySelector('.float-validate').addEventListener('input', function (e) {
+        let value = e.target.value;
+        
+        // Use a regular expression to match the input value
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            e.target.value = value.slice(0, -1);
+        }
+    });
+</script>
 <script>
     var defualCurrency = "{{ get_default_currency_code() }}";
     var defualCurrencyRate = "{{ get_default_currency_rate() }}";

@@ -212,7 +212,7 @@ class MerchantCareController extends Controller
         if($user->kyc == null) return back()->with(['error' => ['Merchant KYC information not found']]);
 
         try{
-            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false)){
+            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false) || ($user->sms_verified == true && $user->email != null) || ($user->sms_verified == true && $user->email != '')) {
                 $user->notify(new Approved($user));
             }
             $date = Carbon::now();
@@ -246,7 +246,7 @@ class MerchantCareController extends Controller
         try{
             $date = Carbon::now();
             $dateTime = $date->format('Y-m-d h:i:s A');
-            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false)){
+            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false) || ($user->sms_verified == true && $user->email != null) || ($user->sms_verified == true && $user->email != '')) {
                 $user->notify(new Rejected($user,$request->reason));
             }
             if( $user->email_verified == false && $user->sms_verified == true){

@@ -176,6 +176,15 @@
 @endsection
 
 @push('script')
+<script>
+    document.querySelector('.number-input').addEventListener('input', function (e) {
+        let value = e.target.value;
+        
+        if (!/^\d*\.?\d{0,2}$/.test(value)) {
+            e.target.value = value.slice(0, -1);
+        }
+    });
+</script>
 <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 <script>
 //  'use strict'
