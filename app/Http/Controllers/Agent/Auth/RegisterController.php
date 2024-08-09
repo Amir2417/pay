@@ -670,7 +670,7 @@ class RegisterController extends Controller
                     ]);
                 }
     
-                if($basic_settings->email_verification == true){
+                if($basic_settings->agent_email_verification == true){
                 
                     $code = generate_random_code();
                     $data = [
@@ -764,7 +764,7 @@ class RegisterController extends Controller
             }
             
             $validated['email_verified']    = $email_verified;
-            $validated['kyc_verified']      = ($basic_settings->kyc_verification == true) ? false : true;
+            $validated['kyc_verified']      = ($basic_settings->agent_kyc_verification == true) ? false : true;
             $validated['password']          = Hash::make($validated['password']);
             $validated['username']          = $userName;
             $validated['address']           = [
@@ -777,7 +777,7 @@ class RegisterController extends Controller
     
                                             
             if($validated['phone'] != '' || $validated['phone'] != null){
-                if($basic_settings->sms_verification == true){
+                if($basic_settings->agent_sms_verification == true){
                 
                     $code = generate_random_code();
                     $data = [
