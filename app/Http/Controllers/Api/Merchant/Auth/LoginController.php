@@ -262,7 +262,7 @@ class LoginController extends Controller
                 $this->createDeveloperApiReg($user);
                 $this->createQr($user);
 
-                $data = ['token' => $token,'type' => $request->type, 'user' => $user ];
+                $data = ['token' => $token,'type' => $request->type, 'merchant' => $user ];
                 $message = ['success'=>[__('Verification code sent to your email address.')]];
                 return ApiHelpers::success($data,$message);
             }else{
@@ -317,7 +317,7 @@ class LoginController extends Controller
                 $this->createDeveloperApiReg($user);
                 $this->createQr($user);
 
-                $data = ['token' => $token,'type' => $request->type,'user' => $user ];
+                $data = ['token' => $token,'type' => $request->type,'merchant' => $user ];
                 $message = ['success'=>[__('Registration Successfull.')]];
                 return ApiHelpers::success($data,$message);
             }
@@ -433,7 +433,7 @@ class LoginController extends Controller
                 $this->createDeveloperApiReg($user);
                 $this->createQr($user);
 
-                $data = ['token' => $token,'type' => $request->type, 'user' => $user ];
+                $data = ['token' => $token,'type' => $request->type, 'merchant' => $user ];
                 $message = ['success'=>[__('Verification code sent to your phone number.')]];
                 return ApiHelpers::success($data,$message);
             }else{
@@ -488,7 +488,7 @@ class LoginController extends Controller
                 $this->createDeveloperApiReg($user);
                 $this->createQr($user);
 
-                $data = ['token' => $token,'type' => $request->type,'user' => $user ];
+                $data = ['token' => $token,'type' => $request->type,'merchant' => $user ];
                 $message = ['success'=>[__('Registration Successfull.')]];
                 return ApiHelpers::success($data,$message);
             }
