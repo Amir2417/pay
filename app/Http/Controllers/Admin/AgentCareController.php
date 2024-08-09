@@ -197,12 +197,11 @@ class AgentCareController extends Controller
         if($user->kyc == null) return back()->with(['error' => [__("Agent KYC information not found")]]);
 
         try{
-            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false) || ($user->sms_verified == true && $user->email != null) || ($user->sms_verified == true && $user->email != '')) {
-                $user->notify(new Approved($user));
-            }
             $date = Carbon::now();
             $dateTime = $date->format('Y-m-d h:i:s A');
-            if( $user->email_verified == false && $user->sms_verified == true){
+            if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false) || ($user->sms_verified == true && $user->email != null) || ($user->sms_verified == true && $user->email != '')) {
+                $user->notify(new Approved($user));
+            }else{
                 $message = __("Hello " .$user->fullname. ", Your KYC verification request is approved by admin." . "Approved At: " .$dateTime . 'Thank you for using our application!');
                 sendApiSMS($message,@$user->full_mobile);
             }
@@ -232,8 +231,7 @@ class AgentCareController extends Controller
             $dateTime = $date->format('Y-m-d h:i:s A');
             if(($user->email_verified == true && $user->sms_verified == true) || ($user->email_verified == true && $user->sms_verified == false) || ($user->sms_verified == true && $user->email != null) || ($user->sms_verified == true && $user->email != '')) {
                 $user->notify(new Rejected($user,$request->reason));
-            }
-            if( $user->email_verified == false && $user->sms_verified == true){
+            }else{
                 $message = __("Hello " .$user->fullname. ", Your KYC verification request is rejected by admin." . "Rejection Reason: ". $request->reason . "Rejected At: " .$dateTime . 'Thank you for using our application!');
                 sendApiSMS($message,@$user->full_mobile);
             }

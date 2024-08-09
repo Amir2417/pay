@@ -31,7 +31,8 @@
         "srmklive/paypal": "^3.0",
         "stripe/stripe-php": "^10.3",
         "torann/geoip": "^3.0",
-        "unicodeveloper/laravel-paystack": "^1.0"
+        "unicodeveloper/laravel-paystack": "^1.0",
+        
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",

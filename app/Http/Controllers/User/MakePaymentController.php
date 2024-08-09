@@ -121,8 +121,7 @@ class MakePaymentController extends Controller
                     ];
                     //sender notifications
                     $user->notify(new SenderMail($user,(object)$notifyDataSender));
-                }
-                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
+                }else{
                     $message = __("Make Payment" . " "  . get_amount($amount).' '.get_default_currency_code() . " " . 'to ' . @$receiver->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                     sendApiSMS($message,@$user->full_mobile);
                 }
@@ -135,7 +134,7 @@ class MakePaymentController extends Controller
             }
             try{
                 $auth_user  = auth()->user();
-                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)){
+                if(($auth_user->email_verified == true && $auth_user->sms_verified == true) || ($auth_user->email_verified == true && $auth_user->sms_verified == false)  || ($auth_user->sms_verified == true && $auth_user->email != null) || ($auth_user->sms_verified == true && $auth_user->email != '')){
                     $notifyDataReceiver = [
                         'trx_id'  => $trx_id,
                         'title'  => "Make Payment from @" .@$user->username." (".@$user->email.")",
@@ -144,8 +143,7 @@ class MakePaymentController extends Controller
                     ];
                     //send notifications
                     $receiver->notify(new ReceiverMail($receiver,(object)$notifyDataReceiver));
-                }
-                if($auth_user->email_verified == false && $auth_user->sms_verified == true){
+                }else{
                     $message = __("Make Payment" . " "  . get_amount($recipient).' '.get_default_currency_code() . " " . 'from ' . @$user->username . ', Transaction ID :' . $trx_id . ", Date : " . Carbon::now()->format('Y-m-d')) . " request sent.";
                     sendApiSMS($message,@$receiver->full_mobile);
                 }
