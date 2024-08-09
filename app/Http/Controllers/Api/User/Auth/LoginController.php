@@ -309,7 +309,7 @@ class LoginController extends Controller
                 $token = $user->createToken('user_token')->accessToken;
                 $this->createUserWallets($user);
                 $this->createQr($user);
-                $data = ['token' => $token, 'user' => $user];
+                $data = ['token' => $token,'type' => $request->type,'user' => $user];
                 $message = ['success'=>[__('Registration Successfull.')]];
                 return ApiHelpers::success($data,$message);
             }
@@ -475,7 +475,7 @@ class LoginController extends Controller
                 $token = $user->createToken('user_token')->accessToken;
                 $this->createUserWallets($user);
                 $this->createQr($user);
-                $data = ['token' => $token, 'user' => $user];
+                $data = ['token' => $token,'type' => $request->type,'user' => $user];
                 $message = ['success'=>[__('Registration Successfull.')]];
                 return ApiHelpers::success($data,$message);
             }
